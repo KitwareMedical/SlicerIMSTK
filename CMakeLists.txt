@@ -36,7 +36,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Extension modules
-## NEXT_MODULE
+add_subdirectory(Floop)
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
