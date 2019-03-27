@@ -22,12 +22,17 @@
 #include "qSlicerFloopModuleWidget.h"
 #include "ui_qSlicerFloopModuleWidget.h"
 
+// Slicer includes
+#include <vtkMRMLModelNode.h>
+
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class qSlicerFloopModuleWidgetPrivate: public Ui_qSlicerFloopModuleWidget
 {
 public:
   qSlicerFloopModuleWidgetPrivate();
+
+  vtkMRMLModelNode* ModelNode;
 };
 
 //-----------------------------------------------------------------------------
@@ -36,7 +41,7 @@ public:
 //-----------------------------------------------------------------------------
 qSlicerFloopModuleWidgetPrivate::qSlicerFloopModuleWidgetPrivate()
 {
-
+  this->ModelNode = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -55,6 +60,32 @@ qSlicerFloopModuleWidget::~qSlicerFloopModuleWidget()
 }
 
 //-----------------------------------------------------------------------------
+void qSlicerFloopModuleWidget::setMRMLScene(vtkMRMLScene* scene)
+{
+  Q_D(qSlicerFloopModuleWidget);
+  d->volumetricMeshNodeComboBox->setMRMLScene(scene);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerFloopModuleWidget::setVolumeNode(vtkMRMLNode* node)
+{
+  this->setVolumeNode(vtkMRMLModelNode::SafeDownCast(node));
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerFloopModuleWidget::setVolumeNode(vtkMRMLModelNode* node)
+{
+  Q_D(qSlicerFloopModuleWidget);
+  if (d->ModelNode == node)
+    {
+    return;
+    }
+
+  d->ModelNode = node;
+  this->updateWidgetFromMRML();
+}
+
+//-----------------------------------------------------------------------------
 void qSlicerFloopModuleWidget::setup()
 {
   Q_D(qSlicerFloopModuleWidget);
@@ -68,4 +99,17 @@ void qSlicerFloopModuleWidget::setup()
     d->playPushButton->style()->standardIcon(QStyle::SP_MediaPlay));
   d->pausePushButton->setIcon(
     d->pausePushButton->style()->standardIcon(QStyle::SP_MediaPause));
+
+  // Signals connections
+  d->volumetricMeshNodeComboBox->connect(
+    d->volumetricMeshNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+    this, SLOT(setVolumeNode(vtkMRMLNode*)));
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerFloopModuleWidget::updateWidgetFromMRML()
+{
+  Q_D(qSlicerFloopModuleWidget);
+
+  // Updates \todo
 }
