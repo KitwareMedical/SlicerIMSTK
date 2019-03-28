@@ -19,9 +19,9 @@
 #include <QDebug>
 
 // SlicerQt includes
-#include "vtkSlicerFloopLogic.h"
-#include "qSlicerFloopModuleWidget.h"
-#include "ui_qSlicerFloopModuleWidget.h"
+#include "vtkSlicerCollisionSimulationLogic.h"
+#include "qSlicerCollisionSimulationModuleWidget.h"
+#include "ui_qSlicerCollisionSimulationModuleWidget.h"
 
 // Slicer includes
 #include <vtkMRMLModelNode.h>
@@ -31,10 +31,10 @@
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class qSlicerFloopModuleWidgetPrivate: public Ui_qSlicerFloopModuleWidget
+class qSlicerCollisionSimulationModuleWidgetPrivate: public Ui_qSlicerCollisionSimulationModuleWidget
 {
 public:
-  qSlicerFloopModuleWidgetPrivate();
+  qSlicerCollisionSimulationModuleWidgetPrivate();
 
   vtkMRMLModelNode* ModelNode;
 
@@ -43,53 +43,53 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// qSlicerFloopModuleWidgetPrivate methods
+// qSlicerCollisionSimulationModuleWidgetPrivate methods
 
 //-----------------------------------------------------------------------------
-qSlicerFloopModuleWidgetPrivate::qSlicerFloopModuleWidgetPrivate()
+qSlicerCollisionSimulationModuleWidgetPrivate::qSlicerCollisionSimulationModuleWidgetPrivate()
 {
   this->ModelNode = nullptr;
   this->IsInitialized = false;
 }
 
 //-----------------------------------------------------------------------------
-// qSlicerFloopModuleWidget methods
+// qSlicerCollisionSimulationModuleWidget methods
 
 //-----------------------------------------------------------------------------
-qSlicerFloopModuleWidget::qSlicerFloopModuleWidget(QWidget* _parent)
+qSlicerCollisionSimulationModuleWidget::qSlicerCollisionSimulationModuleWidget(QWidget* _parent)
   : Superclass( _parent )
-  , d_ptr( new qSlicerFloopModuleWidgetPrivate )
+  , d_ptr( new qSlicerCollisionSimulationModuleWidgetPrivate )
 {
 }
 
 //-----------------------------------------------------------------------------
-qSlicerFloopModuleWidget::~qSlicerFloopModuleWidget()
+qSlicerCollisionSimulationModuleWidget::~qSlicerCollisionSimulationModuleWidget()
 {
 }
 
 //-----------------------------------------------------------------------------
-vtkSlicerFloopLogic* qSlicerFloopModuleWidget::simulationLogic()
+vtkSlicerCollisionSimulationLogic* qSlicerCollisionSimulationModuleWidget::simulationLogic()
 {
-  return vtkSlicerFloopLogic::SafeDownCast(this->logic());
+  return vtkSlicerCollisionSimulationLogic::SafeDownCast(this->logic());
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::setMRMLScene(vtkMRMLScene* scene)
+void qSlicerCollisionSimulationModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
   d->volumetricMeshNodeComboBox->setMRMLScene(scene);
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::setVolumeNode(vtkMRMLNode* node)
+void qSlicerCollisionSimulationModuleWidget::setVolumeNode(vtkMRMLNode* node)
 {
   this->setVolumeNode(vtkMRMLModelNode::SafeDownCast(node));
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::setVolumeNode(vtkMRMLModelNode* node)
+void qSlicerCollisionSimulationModuleWidget::setVolumeNode(vtkMRMLModelNode* node)
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
   if (d->ModelNode == node)
     {
     return;
@@ -100,9 +100,9 @@ void qSlicerFloopModuleWidget::setVolumeNode(vtkMRMLModelNode* node)
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::setup()
+void qSlicerCollisionSimulationModuleWidget::setup()
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
   d->setupUi(this);
   this->Superclass::setup();
 
@@ -131,29 +131,29 @@ void qSlicerFloopModuleWidget::setup()
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::updateWidgetFromMRML()
+void qSlicerCollisionSimulationModuleWidget::updateWidgetFromMRML()
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
 
   // Updates \todo
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::startSimulation()
+void qSlicerCollisionSimulationModuleWidget::startSimulation()
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::pauseSimulation()
+void qSlicerCollisionSimulationModuleWidget::pauseSimulation()
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
   // \todo
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerFloopModuleWidget::endSimulation()
+void qSlicerCollisionSimulationModuleWidget::endSimulation()
 {
-  Q_D(qSlicerFloopModuleWidget);
+  Q_D(qSlicerCollisionSimulationModuleWidget);
   // \todo
 }

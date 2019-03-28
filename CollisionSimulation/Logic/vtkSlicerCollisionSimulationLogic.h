@@ -15,14 +15,14 @@
 
 ==============================================================================*/
 
-// .NAME vtkSlicerFloopLogic - slicer logic class for volumes manipulation
+// .NAME vtkSlicerCollisionSimulationLogic - slicer logic class for volumes manipulation
 // .SECTION Description
 // This class manages the logic associated with reading, saving,
 // and changing propertied of the volumes
 
 
-#ifndef __vtkSlicerFloopLogic_h
-#define __vtkSlicerFloopLogic_h
+#ifndef __vtkSlicerCollisionSimulationLogic_h
+#define __vtkSlicerCollisionSimulationLogic_h
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
@@ -32,27 +32,27 @@
 // STD includes
 #include <cstdlib>
 
-#include "vtkSlicerFloopModuleLogicExport.h"
+#include "vtkSlicerCollisionSimulationModuleLogicExport.h"
 
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class VTK_SLICER_FLOOP_MODULE_LOGIC_EXPORT vtkSlicerFloopLogic :
+class VTK_SLICER_COLLISIONSIMULATION_MODULE_LOGIC_EXPORT vtkSlicerCollisionSimulationLogic :
   public vtkSlicerModuleLogic
 {
 public:
 
-  static vtkSlicerFloopLogic *New();
-  vtkTypeMacro(vtkSlicerFloopLogic, vtkSlicerModuleLogic);
+  static vtkSlicerCollisionSimulationLogic *New();
+  vtkTypeMacro(vtkSlicerCollisionSimulationLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
 protected:
-  vtkSlicerFloopLogic();
-  virtual ~vtkSlicerFloopLogic();
+  vtkSlicerCollisionSimulationLogic();
+  virtual ~vtkSlicerCollisionSimulationLogic();
 
 private:
 
-  vtkSlicerFloopLogic(const vtkSlicerFloopLogic&); // Not implemented
-  void operator=(const vtkSlicerFloopLogic&); // Not implemented
+  vtkSlicerCollisionSimulationLogic(const vtkSlicerCollisionSimulationLogic&); // Not implemented
+  void operator=(const vtkSlicerCollisionSimulationLogic&); // Not implemented
 };
 
 #endif

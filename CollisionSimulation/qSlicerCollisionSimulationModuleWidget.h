@@ -15,22 +15,22 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerFloopModuleWidget_h
-#define __qSlicerFloopModuleWidget_h
+#ifndef __qSlicerCollisionSimulationModuleWidget_h
+#define __qSlicerCollisionSimulationModuleWidget_h
 
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
 
-#include "qSlicerFloopModuleExport.h"
+#include "qSlicerCollisionSimulationModuleExport.h"
 
-class qSlicerFloopModuleWidgetPrivate;
-class vtkSlicerFloopLogic;
+class qSlicerCollisionSimulationModuleWidgetPrivate;
+class vtkSlicerCollisionSimulationLogic;
 
 class vtkMRMLModelNode;
 class vtkMRMLNode;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_FLOOP_EXPORT qSlicerFloopModuleWidget :
+class Q_SLICER_QTMODULES_COLLISIONSIMULATION_EXPORT qSlicerCollisionSimulationModuleWidget :
   public qSlicerAbstractModuleWidget
 {
   Q_OBJECT
@@ -38,10 +38,10 @@ class Q_SLICER_QTMODULES_FLOOP_EXPORT qSlicerFloopModuleWidget :
 public:
 
   typedef qSlicerAbstractModuleWidget Superclass;
-  qSlicerFloopModuleWidget(QWidget *parent=0);
-  virtual ~qSlicerFloopModuleWidget();
+  qSlicerCollisionSimulationModuleWidget(QWidget *parent=0);
+  virtual ~qSlicerCollisionSimulationModuleWidget();
 
-  vtkSlicerFloopLogic* simulationLogic();
+  vtkSlicerCollisionSimulationLogic* simulationLogic();
 
 public slots:
   virtual void setMRMLScene(vtkMRMLScene* scene);
@@ -56,14 +56,14 @@ public slots:
   void endSimulation();
 
 protected:
-  QScopedPointer<qSlicerFloopModuleWidgetPrivate> d_ptr;
+  QScopedPointer<qSlicerCollisionSimulationModuleWidgetPrivate> d_ptr;
 
   virtual void setup();
   void updateWidgetFromMRML();
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerFloopModuleWidget);
-  Q_DISABLE_COPY(qSlicerFloopModuleWidget);
+  Q_DECLARE_PRIVATE(qSlicerCollisionSimulationModuleWidget);
+  Q_DISABLE_COPY(qSlicerCollisionSimulationModuleWidget);
 };
 
 #endif

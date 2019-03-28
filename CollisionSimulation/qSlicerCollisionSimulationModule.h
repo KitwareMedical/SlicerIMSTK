@@ -15,19 +15,19 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerFloopModule_h
-#define __qSlicerFloopModule_h
+#ifndef __qSlicerCollisionSimulationModule_h
+#define __qSlicerCollisionSimulationModule_h
 
 // SlicerQt includes
 #include "qSlicerLoadableModule.h"
 
-#include "qSlicerFloopModuleExport.h"
+#include "qSlicerCollisionSimulationModuleExport.h"
 
-class qSlicerFloopModulePrivate;
+class qSlicerCollisionSimulationModulePrivate;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_FLOOP_EXPORT
-qSlicerFloopModule
+class Q_SLICER_QTMODULES_COLLISIONSIMULATION_EXPORT
+qSlicerCollisionSimulationModule
   : public qSlicerLoadableModule
 {
   Q_OBJECT
@@ -39,8 +39,8 @@ qSlicerFloopModule
 public:
 
   typedef qSlicerLoadableModule Superclass;
-  explicit qSlicerFloopModule(QObject *parent=0);
-  virtual ~qSlicerFloopModule();
+  explicit qSlicerCollisionSimulationModule(QObject *parent=0);
+  virtual ~qSlicerCollisionSimulationModule();
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);
 
@@ -65,11 +65,11 @@ protected:
   virtual vtkMRMLAbstractLogic* createLogic();
 
 protected:
-  QScopedPointer<qSlicerFloopModulePrivate> d_ptr;
+  QScopedPointer<qSlicerCollisionSimulationModulePrivate> d_ptr;
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerFloopModule);
-  Q_DISABLE_COPY(qSlicerFloopModule);
+  Q_DECLARE_PRIVATE(qSlicerCollisionSimulationModule);
+  Q_DISABLE_COPY(qSlicerCollisionSimulationModule);
 
 };
 

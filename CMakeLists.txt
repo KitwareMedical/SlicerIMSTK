@@ -36,7 +36,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(Floop)
+add_subdirectory(CollisionSimulation)
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)

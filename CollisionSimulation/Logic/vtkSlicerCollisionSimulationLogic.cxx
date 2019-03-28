@@ -15,8 +15,8 @@
 
 ==============================================================================*/
 
-// Floop Logic includes
-#include "vtkSlicerFloopLogic.h"
+// CollisionSimulation Logic includes
+#include "vtkSlicerCollisionSimulationLogic.h"
 
 // MRML includes
 #include <vtkMRMLScene.h>
@@ -30,20 +30,20 @@
 #include <cassert>
 
 //----------------------------------------------------------------------------
-vtkStandardNewMacro(vtkSlicerFloopLogic);
+vtkStandardNewMacro(vtkSlicerCollisionSimulationLogic);
 
 //----------------------------------------------------------------------------
-vtkSlicerFloopLogic::vtkSlicerFloopLogic()
+vtkSlicerCollisionSimulationLogic::vtkSlicerCollisionSimulationLogic()
 {
 }
 
 //----------------------------------------------------------------------------
-vtkSlicerFloopLogic::~vtkSlicerFloopLogic()
+vtkSlicerCollisionSimulationLogic::~vtkSlicerCollisionSimulationLogic()
 {
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerFloopLogic::PrintSelf(ostream& os, vtkIndent indent)
+void vtkSlicerCollisionSimulationLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
