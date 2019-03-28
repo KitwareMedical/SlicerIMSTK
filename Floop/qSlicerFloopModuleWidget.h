@@ -24,6 +24,8 @@
 #include "qSlicerFloopModuleExport.h"
 
 class qSlicerFloopModuleWidgetPrivate;
+class vtkSlicerFloopLogic;
+
 class vtkMRMLModelNode;
 class vtkMRMLNode;
 
@@ -39,12 +41,19 @@ public:
   qSlicerFloopModuleWidget(QWidget *parent=0);
   virtual ~qSlicerFloopModuleWidget();
 
+  vtkSlicerFloopLogic* simulationLogic();
+
 public slots:
   virtual void setMRMLScene(vtkMRMLScene* scene);
 
   // Set the current volume node
   void setVolumeNode(vtkMRMLNode* node);
   void setVolumeNode(vtkMRMLModelNode* node);
+
+  // Simulation controls
+  void startSimulation();
+  void pauseSimulation();
+  void endSimulation();
 
 protected:
   QScopedPointer<qSlicerFloopModuleWidgetPrivate> d_ptr;

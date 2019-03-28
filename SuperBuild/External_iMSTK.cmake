@@ -66,7 +66,8 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
     DEPENDS
       ${${proj}_DEPENDS}
     )
-  set(${proj}_DIR ${EP_BINARY_DIR})
+  set(${proj}_DIR ${${proj}_BINARY_DIR}/InnerBuild)
+  mark_as_superbuild(${proj}_DIR)
 
 else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDS})
