@@ -22,13 +22,19 @@
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="label">
+        <property name="toolTip">
+         <string/>
+        </property>
         <property name="text">
-         <string>Input Volumetric Mesh</string>
+         <string>Input Mesh</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="volumetricMeshNodeComboBox">
+       <widget class="qMRMLNodeComboBox" name="inputMeshNodeComboBox">
+        <property name="toolTip">
+         <string>Mesh that will be dropped. The forces will be simulated on this mesh.</string>
+        </property>
         <property name="nodeTypes">
          <stringlist>
           <string>vtkMRMLModelNode</string>
@@ -45,6 +51,25 @@
         </property>
         <property name="selectNodeUponCreation">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Input Floor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="qMRMLNodeComboBox" name="floorMeshNodeComboBox">
+        <property name="toolTip">
+         <string>Mesh that will be used as the floor for the input mesh to collide with.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLModelNode</string>
+         </stringlist>
         </property>
        </widget>
       </item>

@@ -46,9 +46,13 @@ public:
 public slots:
   virtual void setMRMLScene(vtkMRMLScene* scene);
 
-  // Set the current volume node
-  void setVolumeNode(vtkMRMLNode* node);
-  void setVolumeNode(vtkMRMLModelNode* node);
+  // Set the current input mesh node
+  void setInputMeshNode(vtkMRMLNode* node);
+  void setInputMeshNode(vtkMRMLModelNode* node);
+
+  // Set the current floor mesh node
+  void setFloorMeshNode(vtkMRMLNode* node);
+  void setFloorMeshNode(vtkMRMLModelNode* node);
 
   // Simulation controls
   void startSimulation();

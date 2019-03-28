@@ -19,7 +19,11 @@
 #include "vtkSlicerCollisionSimulationLogic.h"
 
 // MRML includes
+#include <vtkMRMLNode.h>
 #include <vtkMRMLScene.h>
+#include <vtkMRMLModelStorageNode.h>
+#include <vtkMRMLStorableNode.h>
+#include <vtkMRMLStorageNode.h>
 
 // VTK includes
 #include <vtkIntArray.h>
@@ -40,6 +44,42 @@ vtkSlicerCollisionSimulationLogic::vtkSlicerCollisionSimulationLogic()
 //----------------------------------------------------------------------------
 vtkSlicerCollisionSimulationLogic::~vtkSlicerCollisionSimulationLogic()
 {
+}
+
+//----------------------------------------------------------------------------
+const char* vtkSlicerCollisionSimulationLogic::ForceGetNodeFileName(vtkMRMLNode* node)
+{
+  vtkMRMLStorableNode* withStorageNode = vtkMRMLStorableNode::SafeDownCast(node);
+  if (!withStorageNode)
+    {
+    return nullptr;
+    }
+
+  vtkMRMLStorageNode* storageNode = withStorageNode->GetStorageNode();
+  if (!storageNode)
+    {
+    withStorageNode->AddDefaultStorageNode();
+    storageNode = withStorageNode->GetStorageNode();
+    }
+
+  std::string filename = storageNode->GetFileName();
+  if (filename.empty())
+    {
+    // Save as a temp file
+    filename = this->GetApplicationLogic()->GetTemporaryPath();
+    filename += node->GetName();
+    filename += storageNode->GetDefaultWriteFileExtension();
+
+    storageNode->SetFileName(filename.c_str());
+    if (storageNode->WriteData(withStorageNode) != 1)
+      {
+      std::cerr << "Error when writing node to temporary path" << std::endl;
+      return nullptr;
+      }
+    storageNode->SetFileName(nullptr);
+    }
+
+  return filename.c_str();
 }
 
 //----------------------------------------------------------------------------

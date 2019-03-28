@@ -62,20 +62,20 @@ qSlicerCollisionSimulationModule::~qSlicerCollisionSimulationModule()
 //-----------------------------------------------------------------------------
 QString qSlicerCollisionSimulationModule::helpText() const
 {
-  return "This is a loadable module that can be bundled in an extension";
+  return "Tihs is a simple example of simulation intergation between iMSTK and Slicer.";
 }
 
 //-----------------------------------------------------------------------------
 QString qSlicerCollisionSimulationModule::acknowledgementText() const
 {
-  return "This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN";
+  return "";
 }
 
 //-----------------------------------------------------------------------------
 QStringList qSlicerCollisionSimulationModule::contributors() const
 {
   QStringList moduleContributors;
-  moduleContributors << QString("John Doe (AnyWare Corp.)");
+  moduleContributors << QString("Johan Andruejol (Kitware Inc.");
   return moduleContributors;
 }
 
@@ -88,7 +88,7 @@ QIcon qSlicerCollisionSimulationModule::icon() const
 //-----------------------------------------------------------------------------
 QStringList qSlicerCollisionSimulationModule::categories() const
 {
-  return QStringList() << "Examples";
+  return QStringList() << "Simulation";
 }
 
 //-----------------------------------------------------------------------------
