@@ -27,7 +27,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
 
   ExternalProject_SetIfNotDefined(
     ${SUPERBUILD_TOPLEVEL_PROJECT}_${proj}_GIT_TAG
-    "f04c77630ed6ab5ce5a0da5aa014879d7477be10"
+    "4dda431116f956abdd2df8fe38cb5b699a352c39"
     QUIET
     )
 
@@ -68,6 +68,19 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
     )
   set(${proj}_DIR ${${proj}_BINARY_DIR}/InnerBuild)
   mark_as_superbuild(${proj}_DIR)
+
+  # library paths
+  # \todo: <CMAKE_CFG_INTDIR doesn't work for now. Just add the types manually
+  # See: https://issues.slicer.org/view.php?id=4682
+  set(${proj}_LIBRARY_PATHS_LAUNCHER_BUILD
+    ${${proj}_RUNTIME_OUTPUT_DIRECTORY}/Debug
+    ${${proj}_RUNTIME_OUTPUT_DIRECTORY}/MinSizeRel
+    ${${proj}_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
+    ${${proj}_RUNTIME_OUTPUT_DIRECTORY}/Release)
+  mark_as_superbuild(
+    VARS ${proj}_LIBRARY_PATHS_LAUNCHER_BUILD
+    LABELS "LIBRARY_PATHS_LAUNCHER_BUILD"
+  )
 
 else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDS})
