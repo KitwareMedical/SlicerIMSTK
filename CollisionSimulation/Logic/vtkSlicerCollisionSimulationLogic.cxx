@@ -47,12 +47,12 @@ vtkSlicerCollisionSimulationLogic::~vtkSlicerCollisionSimulationLogic()
 }
 
 //----------------------------------------------------------------------------
-const char* vtkSlicerCollisionSimulationLogic::ForceGetNodeFileName(vtkMRMLNode* node)
+std::string vtkSlicerCollisionSimulationLogic::ForceGetNodeFileName(vtkMRMLNode* node)
 {
   vtkMRMLStorableNode* withStorageNode = vtkMRMLStorableNode::SafeDownCast(node);
   if (!withStorageNode)
     {
-    return nullptr;
+    return std::string();
     }
 
   vtkMRMLStorageNode* storageNode = withStorageNode->GetStorageNode();
@@ -79,7 +79,7 @@ const char* vtkSlicerCollisionSimulationLogic::ForceGetNodeFileName(vtkMRMLNode*
     storageNode->SetFileName(nullptr);
     }
 
-  return filename.c_str();
+  return filename;
 }
 
 //----------------------------------------------------------------------------

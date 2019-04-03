@@ -47,7 +47,7 @@ public:
 
   // Get the node filename.
   // If the node has none, try to write to a temporary file and return that.
-  const char* ForceGetNodeFileName(vtkMRMLNode* node);
+  std::string ForceGetNodeFileName(vtkMRMLNode* node);
 
 protected:
   vtkSlicerCollisionSimulationLogic();

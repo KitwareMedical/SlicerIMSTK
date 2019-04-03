@@ -34,7 +34,7 @@ class Q_SLICER_QTMODULES_COLLISIONSIMULATION_EXPORT qSlicerCollisionSimulationMo
   public qSlicerAbstractModuleWidget
 {
   Q_OBJECT
-
+  Q_PROPERTY(int simulationStatus READ simulationStatus)
 public:
 
   typedef qSlicerAbstractModuleWidget Superclass;
@@ -42,6 +42,11 @@ public:
   virtual ~qSlicerCollisionSimulationModuleWidget();
 
   vtkSlicerCollisionSimulationLogic* simulationLogic();
+
+  // Return the simulation status
+  // This maps to imstk::SimulationStatus. Int is used to keep this accessible
+  // to python
+  int simulationStatus();
 
 public slots:
   virtual void setMRMLScene(vtkMRMLScene* scene);
@@ -64,6 +69,9 @@ protected:
 
   virtual void setup();
   void updateWidgetFromMRML();
+
+protected slots:
+  void updateFromSimulation();
 
 private:
   Q_DECLARE_PRIVATE(qSlicerCollisionSimulationModuleWidget);
