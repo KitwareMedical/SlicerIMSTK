@@ -137,7 +137,7 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
     /*Number of Constraints*/ 1,
     /*Constraint configuration*/ "FEM NeoHookean 1.0 0.3",
     /*Mass*/ 1.0,
-    /*Gravity*/ "0 -9.8 0",
+    /*Gravity*/ "0 0 -9.8",
     /*TimeStep*/ 0.001,
     /*FixedPoint*/ "",
     /*NumberOfIterationInConstraintSolver*/ 2,
