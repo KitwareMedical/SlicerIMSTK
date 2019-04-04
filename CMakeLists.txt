@@ -37,6 +37,7 @@ endif()
 #-----------------------------------------------------------------------------
 # Extension modules
 add_subdirectory(CollisionSimulation)
+add_subdirectory(SimulationData)
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
