@@ -76,30 +76,41 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="qMRMLNodeComboBox" name="floorMeshNodeComboBox">
-          <property name="toolTip">
-           <string>Mesh that will be used as the floor for the input mesh to collide with.</string>
-          </property>
-          <property name="nodeTypes">
-           <stringlist>
-            <string>vtkMRMLModelNode</string>
-           </stringlist>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="floorMeshWarningLabel">
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Input Floor mesh is &lt;span style=&quot; font-weight:600;&quot;&gt;NOT&lt;/span&gt; a volumetric mesh. Only volumetric mesh are supported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="qMRMLNodeComboBox" name="floorMeshNodeComboBox">
+        <property name="toolTip">
+         <string>Mesh that will be used as the floor for the input mesh to collide with.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLModelNode</string>
+         </stringlist>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Output Mesh</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="qMRMLNodeComboBox" name="outputMeshNodeComboBox">
+        <property name="toolTip">
+         <string>Model node that will receive the modified simulated data.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLModelNode</string>
+         </stringlist>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

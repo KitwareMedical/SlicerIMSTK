@@ -59,6 +59,10 @@ public slots:
   void setFloorMeshNode(vtkMRMLNode* node);
   void setFloorMeshNode(vtkMRMLModelNode* node);
 
+  // Set the current floor mesh node
+  void setOutputMeshNode(vtkMRMLNode* node);
+  void setOutputMeshNode(vtkMRMLModelNode* node);
+
   // Simulation controls
   void startSimulation();
   void pauseSimulation();

@@ -25,6 +25,7 @@
 #include "ui_qSlicerCollisionSimulationModuleWidget.h"
 
 // Slicer includes
+#include <vtkMRMLDisplayNode.h>
 #include <vtkMRMLModelNode.h>
 
 // VTK includes
@@ -53,11 +54,13 @@ public:
   qSlicerCollisionSimulationModuleWidgetPrivate(qSlicerCollisionSimulationModuleWidget& object);
 
   void setupSimulation();
+  void setupOutput();
 
   QTimer MeshUpdateTimer;
 
   vtkMRMLModelNode* InputMeshNode;
   vtkMRMLModelNode* FloorMeshNode;
+  vtkMRMLModelNode* OutputMeshNode;
 
   std::shared_ptr<imstk::Scene> Scene;
   std::shared_ptr<imstk::SimulationManager> SDK;
@@ -85,6 +88,7 @@ qSlicerCollisionSimulationModuleWidgetPrivate
 {
   this->InputMeshNode = nullptr;
   this->FloorMeshNode = nullptr;
+  this->OutputMeshNode = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -190,9 +194,24 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   auto light = std::make_shared<imstk::DirectionalLight>("Light");
   light->setFocalPoint(imstk::Vec3d(5, -8, -5));
   light->setIntensity(1);
-  this->Scene->addLight(light);;
+  this->Scene->addLight(light);
 
   this->SDK->setActiveScene(this->Scene);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerCollisionSimulationModuleWidgetPrivate::setupOutput()
+{
+  Q_Q(qSlicerCollisionSimulationModuleWidget);
+  // Copy input grid into the output grid
+  vtkNew<vtkUnstructuredGrid> outputData;
+  outputData->DeepCopy(this->InputMeshNode->GetUnstructuredGrid());
+  this->OutputMeshNode->SetAndObserveMesh(outputData);
+
+  // Also make sure the mesh is visible
+  this->OutputMeshNode->CreateDefaultDisplayNodes();
+  vtkMRMLDisplayNode* outputDisplayNode = this->OutputMeshNode->GetDisplayNode();
+  outputDisplayNode->VisibilityOn();
 }
 
 //-----------------------------------------------------------------------------
@@ -222,6 +241,7 @@ void qSlicerCollisionSimulationModuleWidget::setMRMLScene(vtkMRMLScene* scene)
   Q_D(qSlicerCollisionSimulationModuleWidget);
   d->inputMeshNodeComboBox->setMRMLScene(scene);
   d->floorMeshNodeComboBox->setMRMLScene(scene);
+  d->outputMeshNodeComboBox->setMRMLScene(scene);
 }
 
 //-----------------------------------------------------------------------------
@@ -263,6 +283,25 @@ void qSlicerCollisionSimulationModuleWidget::setFloorMeshNode(vtkMRMLModelNode* 
 }
 
 //-----------------------------------------------------------------------------
+void qSlicerCollisionSimulationModuleWidget::setOutputMeshNode(vtkMRMLNode* node)
+{
+  this->setOutputMeshNode(vtkMRMLModelNode::SafeDownCast(node));
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerCollisionSimulationModuleWidget::setOutputMeshNode(vtkMRMLModelNode* node)
+{
+  Q_D(qSlicerCollisionSimulationModuleWidget);
+  if (d->OutputMeshNode == node)
+  {
+    return;
+  }
+
+  d->OutputMeshNode = node;
+  this->updateWidgetFromMRML();
+}
+
+//-----------------------------------------------------------------------------
 void qSlicerCollisionSimulationModuleWidget::setup()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
@@ -280,8 +319,6 @@ void qSlicerCollisionSimulationModuleWidget::setup()
   QSize warningIconSize(16, d->inputMeshNodeComboBox->height());
   d->inputMeshWarningLabel->setPixmap(
     d->inputMeshWarningLabel->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(warningIconSize));
-  d->floorMeshWarningLabel->setPixmap(
-    d->floorMeshWarningLabel->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(warningIconSize));
 
   // Signals connections
   d->inputMeshNodeComboBox->connect(
@@ -290,6 +327,9 @@ void qSlicerCollisionSimulationModuleWidget::setup()
   d->floorMeshNodeComboBox->connect(
     d->floorMeshNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
     this, SLOT(setFloorMeshNode(vtkMRMLNode*)));
+  d->outputMeshNodeComboBox->connect(
+    d->outputMeshNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+    this, SLOT(setOutputMeshNode(vtkMRMLNode*)));
 
   d->stopPushButton->connect(
     d->stopPushButton, SIGNAL(clicked()),
@@ -322,7 +362,6 @@ void qSlicerCollisionSimulationModuleWidget::updateWidgetFromMRML()
 
   // input mesh
   d->inputMeshNodeComboBox->setEnabled(!freezeInputs);
-
   bool isInputVolumetricMesh =
     d->InputMeshNode && d->InputMeshNode->GetUnstructuredGrid();
   d->inputMeshWarningLabel->setVisible(
@@ -330,14 +369,18 @@ void qSlicerCollisionSimulationModuleWidget::updateWidgetFromMRML()
 
   // floor mesh
   d->floorMeshNodeComboBox->setEnabled(!freezeInputs);
-
   bool isFloorVolumetricMesh =
     d->FloorMeshNode && d->FloorMeshNode->GetUnstructuredGrid();
-  d->floorMeshWarningLabel->setVisible(
-    d->FloorMeshNode && !d->FloorMeshNode->GetUnstructuredGrid());
+
+  // output mesh
+  d->outputMeshNodeComboBox->setEnabled(!freezeInputs);
+  bool isOutputSet = d->OutputMeshNode != nullptr;
 
   // Simulation controls
-  bool areInputsValid = isInputVolumetricMesh && isFloorVolumetricMesh;
+  bool areInputsValid =
+    isInputVolumetricMesh &&
+    isFloorVolumetricMesh &&
+    isOutputSet;
   d->stopPushButton->setEnabled(areInputsValid);
   d->playPushButton->setEnabled(areInputsValid);
   d->pausePushButton->setEnabled(areInputsValid);
@@ -356,6 +399,7 @@ void qSlicerCollisionSimulationModuleWidget::startSimulation()
   Q_D(qSlicerCollisionSimulationModuleWidget);
 
   d->setupSimulation();
+  d->setupOutput();
   d->MeshUpdateTimer.start();
   d->SDK->startSimulation(imstk::SimulationStatus::RUNNING);
   this->updateWidgetFromMRML();
@@ -385,13 +429,13 @@ void qSlicerCollisionSimulationModuleWidget::endSimulation()
 void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
-  Q_ASSERT(d->InputMeshNode && d->InputMeshNode->GetUnstructuredGrid());
+  Q_ASSERT(d->OutputMeshNode && d->OutputMeshNode->GetUnstructuredGrid());
 
   imstk::StdVectorOfVec3d newPoints =
     d->DeformableModel->getCurrentState()->getPositions();
 
-  int wasModifying = d->InputMeshNode->StartModify();
-  vtkUnstructuredGrid* data = d->InputMeshNode->GetUnstructuredGrid();
+  int wasModifying = d->OutputMeshNode->StartModify();
+  vtkUnstructuredGrid* data = d->OutputMeshNode->GetUnstructuredGrid();
   vtkPoints* dataPoints = data->GetPoints();
 
   for (int i = 0; i < dataPoints->GetNumberOfPoints(); i++)
@@ -400,6 +444,7 @@ void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
     }
   data->SetPoints(dataPoints);
   data->Modified();
-  d->InputMeshNode->SetAndObserveMesh(data);
-  d->InputMeshNode->EndModify(wasModifying);
+
+  d->OutputMeshNode->SetAndObserveMesh(data);
+  d->OutputMeshNode->EndModify(wasModifying);
 }
