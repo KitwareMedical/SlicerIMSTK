@@ -27,7 +27,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
 
   ExternalProject_SetIfNotDefined(
     ${SUPERBUILD_TOPLEVEL_PROJECT}_${proj}_GIT_TAG
-    "4dda431116f956abdd2df8fe38cb5b699a352c39"
+    "fbca4b7e704a4fbb3fee1ef2578a5004c1bdb4a1"
     QUIET
     )
 

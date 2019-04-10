@@ -342,7 +342,10 @@ void qSlicerCollisionSimulationModuleWidget::setup()
     this, SLOT(pauseSimulation()));
 
   // Create the SDK
-  d->SDK = std::make_shared<imstk::SimulationManager>(false, false);
+  d->SDK = std::make_shared<imstk::SimulationManager>(
+    /*disableRendering=*/true,
+    /*enableVR=*/false
+    );
 
   // Timer setup
   d->MeshUpdateTimer.setInterval(7);
