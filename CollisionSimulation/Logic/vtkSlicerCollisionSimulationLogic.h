@@ -45,9 +45,8 @@ public:
   vtkTypeMacro(vtkSlicerCollisionSimulationLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Get the node filename.
-  // If the node has none, try to write to a temporary file and return that.
-  std::string ForceGetNodeFileName(vtkMRMLNode* node);
+  // Write the node to a temporary folder and return the path
+  std::string WriteNodeToTemporaryDirectory(vtkMRMLNode* node);
 
 protected:
   vtkSlicerCollisionSimulationLogic();
