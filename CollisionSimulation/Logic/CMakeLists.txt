@@ -2,6 +2,10 @@ project(vtkSlicer${MODULE_NAME}ModuleLogic)
 
 set(KIT ${PROJECT_NAME})
 
+#-----------------------------------------------------------------------------
+# iMSTK
+find_package(iMSTK REQUIRED CONFIG)
+
 set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
 
 set(${KIT}_INCLUDE_DIRECTORIES
@@ -14,6 +18,7 @@ set(${KIT}_SRCS
 
 set(${KIT}_TARGET_LIBRARIES
   ${ITK_LIBRARIES}
+  imstk::SimulationManager
   )
 
 #-----------------------------------------------------------------------------

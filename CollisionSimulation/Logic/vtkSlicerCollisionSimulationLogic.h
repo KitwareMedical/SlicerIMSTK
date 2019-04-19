@@ -29,11 +29,15 @@
 
 // MRML includes
 
+// iMSTK includes
+#include <imstkSimulationManager.h>
+
 // STD includes
 #include <cstdlib>
+#include <memory>
 
+// Module includes
 #include "vtkSlicerCollisionSimulationModuleLogicExport.h"
-
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class VTK_SLICER_COLLISIONSIMULATION_MODULE_LOGIC_EXPORT vtkSlicerCollisionSimulationLogic :
@@ -45,17 +49,30 @@ public:
   vtkTypeMacro(vtkSlicerCollisionSimulationLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Write the node to a temporary folder and return the path
+  /// Write the node to a temporary folder and return the path
   std::string WriteNodeToTemporaryDirectory(vtkMRMLNode* node);
+
+  /// imstk::SimulationManager
+  ///
+  /// Create the SDK if it doesn't exist already. The logic owns the SDK.
+  void CreateSDK(bool enableVR = false, bool disableRendering = true);
+
+  /// imstk::SimulationManager
+  ///
+  /// Return the current SDK. If none exist, one is created with the default
+  /// parameters.
+  /// \sa CreateSDK
+  std::shared_ptr<imstk::SimulationManager> GetSDK();
 
 protected:
   vtkSlicerCollisionSimulationLogic();
   virtual ~vtkSlicerCollisionSimulationLogic();
 
 private:
-
   vtkSlicerCollisionSimulationLogic(const vtkSlicerCollisionSimulationLogic&); // Not implemented
   void operator=(const vtkSlicerCollisionSimulationLogic&); // Not implemented
+
+  std::shared_ptr<imstk::SimulationManager> SDK;
 };
 
 #endif

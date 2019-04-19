@@ -61,6 +61,8 @@ public:
   void setupSimulation();
   void setupOutput();
 
+  std::shared_ptr<imstk::SimulationManager> SDK();
+
   QTimer MeshUpdateTimer;
 
   vtkMRMLModelNode* InputMeshNode;
@@ -68,8 +70,6 @@ public:
   vtkMRMLModelNode* OutputMeshNode;
 
   std::shared_ptr<imstk::Scene> Scene;
-  std::shared_ptr<imstk::SimulationManager> SDK;
-
   std::shared_ptr<imstk::PbdModel> DeformableModel;
 
   // \todo Expose these ?
@@ -95,6 +95,15 @@ qSlicerCollisionSimulationModuleWidgetPrivate
   this->OutputMeshNode = nullptr;
 
   this->DeformableModel = nullptr;
+  this->Scene = nullptr;
+}
+
+//-----------------------------------------------------------------------------
+std::shared_ptr<imstk::SimulationManager>
+qSlicerCollisionSimulationModuleWidgetPrivate::SDK()
+{
+  Q_Q(qSlicerCollisionSimulationModuleWidget);
+  return q->simulationLogic()->GetSDK();
 }
 
 //-----------------------------------------------------------------------------
@@ -104,7 +113,7 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   // Do you need to have two models ? One to follow and one to deform ?
 
   // Create a new scene
-  this->Scene = this->SDK->createNewScene();
+  this->Scene = this->SDK()->createNewScene();
 
   // Get the mesh from its filename
   std::string meshFilename =
@@ -215,7 +224,7 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   colGraph->addInteractionPair(pair);
 
   // Set the scene
-  this->SDK->setActiveScene(this->Scene);
+  this->SDK()->setActiveScene(this->Scene, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -361,8 +370,8 @@ void qSlicerCollisionSimulationModuleWidget::setup()
     this, SLOT(pauseSimulation()));
 
   // Create the SDK
-  d->SDK = std::make_shared<imstk::SimulationManager>(
-    /*disableRendering=*/true,
+  this->simulationLogic()->CreateSDK(
+    /*disableRendering=*/false,
     /*enableVR=*/false
     );
 
@@ -412,7 +421,7 @@ void qSlicerCollisionSimulationModuleWidget::updateWidgetFromMRML()
 int qSlicerCollisionSimulationModuleWidget::simulationStatus()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
-  return static_cast<int>(d->SDK->getStatus());
+  return static_cast<int>(d->SDK()->getStatus());
 }
 
 //-----------------------------------------------------------------------------
@@ -423,7 +432,7 @@ void qSlicerCollisionSimulationModuleWidget::startSimulation()
   d->setupSimulation();
   d->setupOutput();
   d->MeshUpdateTimer.start();
-  d->SDK->startSimulation(imstk::SimulationStatus::RUNNING);
+  d->SDK()->startSimulation(imstk::SimulationStatus::RUNNING);
   this->updateWidgetFromMRML();
 }
 
@@ -431,12 +440,12 @@ void qSlicerCollisionSimulationModuleWidget::startSimulation()
 void qSlicerCollisionSimulationModuleWidget::pauseSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
-  if (d->SDK->getStatus() != imstk::SimulationStatus::RUNNING)
+  if (d->SDK()->getStatus() != imstk::SimulationStatus::RUNNING)
     {
     return;
     }
 
-  d->SDK->pauseSimulation();
+  d->SDK()->pauseSimulation();
   d->MeshUpdateTimer.stop();
   this->updateFromSimulation();
   this->updateWidgetFromMRML();
@@ -446,13 +455,13 @@ void qSlicerCollisionSimulationModuleWidget::pauseSimulation()
 void qSlicerCollisionSimulationModuleWidget::endSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
-  if (d->SDK->getStatus() != imstk::SimulationStatus::RUNNING
-    || d->SDK->getStatus() != imstk::SimulationStatus::PAUSED)
+  if (d->SDK()->getStatus() != imstk::SimulationStatus::RUNNING
+    || d->SDK()->getStatus() != imstk::SimulationStatus::PAUSED)
     {
     return;
     }
 
-  d->SDK->endSimulation();
+  d->SDK()->endSimulation();
   d->MeshUpdateTimer.stop();
   this->updateFromSimulation();
   this->updateWidgetFromMRML();

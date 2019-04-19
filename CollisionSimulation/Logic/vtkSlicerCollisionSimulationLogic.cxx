@@ -80,7 +80,33 @@ std::string vtkSlicerCollisionSimulationLogic
 }
 
 //----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic
+::CreateSDK(bool enableVR, bool disableRendering)
+{
+  if (!this->SDK)
+  {
+    this->SDK = std::make_shared<imstk::SimulationManager>(
+      /*disableRendering=*/disableRendering,
+      /*enableVR=*/enableVR
+    );
+  }
+}
+
+//----------------------------------------------------------------------------
+std::shared_ptr<imstk::SimulationManager> vtkSlicerCollisionSimulationLogic
+::GetSDK()
+{
+  if (!this->SDK)
+  {
+    this->CreateSDK();
+  }
+  return this->SDK;
+}
+
+//----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
+
+  os << indent << "SDK: " << this->SDK ? this->SDK : nullptr;
 }
