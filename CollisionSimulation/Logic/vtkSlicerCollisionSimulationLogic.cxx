@@ -104,9 +104,33 @@ std::shared_ptr<imstk::SimulationManager> vtkSlicerCollisionSimulationLogic
 }
 
 //----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic
+::CreateScene(const std::string& name, bool makeActive)
+{
+  auto scene = this->GetSDK()->createNewScene(name);
+  this->GetSDK()->addScene(scene);
+  if (makeActive)
+  {
+    this->SetActiveScene(name);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic
+::SetActiveScene(const std::string& name, bool unloadPrevious)
+{
+  this->GetSDK()->setActiveScene(name, unloadPrevious);
+}
+
+//----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 
   os << indent << "SDK: " << this->SDK ? this->SDK : nullptr;
+  if (this->SDK)
+  {
+    auto scene = this->SDK->getActiveScene();
+    os << indent << "ActiveScene: " << scene ? scene->getName() : "No scene";
+  }
 }

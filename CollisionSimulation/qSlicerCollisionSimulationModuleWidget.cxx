@@ -69,7 +69,6 @@ public:
   vtkMRMLModelNode* FloorMeshNode;
   vtkMRMLModelNode* OutputMeshNode;
 
-  std::shared_ptr<imstk::Scene> Scene;
   std::shared_ptr<imstk::PbdModel> DeformableModel;
 
   // \todo Expose these ?
@@ -95,7 +94,6 @@ qSlicerCollisionSimulationModuleWidgetPrivate
   this->OutputMeshNode = nullptr;
 
   this->DeformableModel = nullptr;
-  this->Scene = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -113,7 +111,8 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   // Do you need to have two models ? One to follow and one to deform ?
 
   // Create a new scene
-  this->Scene = this->SDK()->createNewScene();
+  q->simulationLogic()->CreateScene("CollisionSimulation", false);
+  auto scene = this->SDK()->getScene("CollisionSimulation");
 
   // Get the mesh from its filename
   std::string meshFilename =
@@ -182,8 +181,8 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   auto pbdSolver = std::make_shared<imstk::PbdSolver>();
   pbdSolver->setPbdObject(deformableObject);
 
-  this->Scene->addNonlinearSolver(pbdSolver);
-  this->Scene->addSceneObject(deformableObject);
+  scene->addNonlinearSolver(pbdSolver);
+  scene->addSceneObject(deformableObject);
 
   // Build floor geometry
   // Same thing for the floor
@@ -212,11 +211,11 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   auto pbdSolverfloor = std::make_shared<imstk::PbdSolver>();
   pbdSolverfloor->setPbdObject(floor);
 
-  this->Scene->addNonlinearSolver(pbdSolverfloor);
-  this->Scene->addSceneObject(floor);
+  scene->addNonlinearSolver(pbdSolverfloor);
+  scene->addSceneObject(floor);
 
   // Collisions
-  auto colGraph = this->Scene->getCollisionGraph();
+  auto colGraph = scene->getCollisionGraph();
   auto pair = std::make_shared<imstk::PbdInteractionPair>(
     imstk::PbdInteractionPair(deformableObject, floor));
   pair->setNumberOfInterations(2);
@@ -224,7 +223,7 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   colGraph->addInteractionPair(pair);
 
   // Set the scene
-  this->SDK()->setActiveScene(this->Scene, true);
+  q->simulationLogic()->SetActiveScene("CollisionSimulation", true);
 }
 
 //-----------------------------------------------------------------------------

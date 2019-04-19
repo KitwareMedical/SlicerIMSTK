@@ -64,6 +64,19 @@ public:
   /// \sa CreateSDK
   std::shared_ptr<imstk::SimulationManager> GetSDK();
 
+
+  /// imstk::Scene
+  ///
+  /// Create a scene with the given name. It will be added to the SDK.
+  /// By default, it will be made the active scene.
+  /// \sa GetSDK
+  void CreateScene(const std::string& name, bool makeActive = true);
+
+  /// imstk::Scene
+  ///
+  /// Set the active scene on the SDK.
+  void SetActiveScene(const std::string& name, bool unloadPrevious = true);
+
 protected:
   vtkSlicerCollisionSimulationLogic();
   virtual ~vtkSlicerCollisionSimulationLogic();
