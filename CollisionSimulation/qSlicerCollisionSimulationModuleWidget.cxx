@@ -25,6 +25,7 @@
 #include "ui_qSlicerCollisionSimulationModuleWidget.h"
 
 // Slicer includes
+#include <vtkMRMLCommandLineModuleNode.h>
 #include <vtkMRMLDisplayNode.h>
 #include <vtkMRMLModelNode.h>
 
@@ -69,7 +70,7 @@ public:
   vtkMRMLModelNode* FloorMeshNode;
   vtkMRMLModelNode* OutputMeshNode;
 
-  std::shared_ptr<imstk::PbdModel> DeformableModel;
+  std::string InputMeshNodeName;
 
   // \todo Expose these ?
   const double scalingFactor = 1.;
@@ -92,8 +93,6 @@ qSlicerCollisionSimulationModuleWidgetPrivate
   this->InputMeshNode = nullptr;
   this->FloorMeshNode = nullptr;
   this->OutputMeshNode = nullptr;
-
-  this->DeformableModel = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -114,113 +113,28 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   q->simulationLogic()->CreateScene("CollisionSimulation", false);
   auto scene = this->SDK()->getScene("CollisionSimulation");
 
-  // Get the mesh from its filename
-  std::string meshFilename =
-    q->simulationLogic()->WriteNodeToTemporaryDirectory(this->InputMeshNode);
-  if (meshFilename.empty())
-    {
-    std::cerr << "Cannot write input mesh node to temporary folder."
-      << " Cannot start Simulation." << std::endl;
-    return;
-    }
-
-  std::string floorMeshFilename =
-    q->simulationLogic()->WriteNodeToTemporaryDirectory(this->FloorMeshNode);
-  if (floorMeshFilename.empty())
-    {
-    std::cerr << "Cannot write floor mesh node to temporary folder."
-      << " Cannot start Simulation." << std::endl;
-    return;
-    }
-
-  auto mesh = imstk::MeshIO::read(meshFilename);
-  QFile meshFile(QString(meshFilename.c_str()));
-  meshFile.remove();
-  auto floorMesh = imstk::MeshIO::read(floorMeshFilename);
-  QFile floorMeshFile(QString(floorMeshFilename.c_str()));
-  floorMeshFile.remove();
-
-  // Extract the surface mesh from the tetrahedral mesh
-  auto volTetMesh = std::dynamic_pointer_cast<imstk::TetrahedralMesh>(mesh);
-  volTetMesh->scale(this->geoScalingFactor, imstk::Geometry::TransformType::ApplyToData);
-  auto surfMesh = std::make_shared<imstk::SurfaceMesh>();
-  volTetMesh->extractSurfaceMesh(surfMesh, true);
-
-  // Construct one to one nodal map based on the above meshes
-  auto oneToOneNodalMap = std::make_shared<imstk::OneToOneMap>();
-  oneToOneNodalMap->setMaster(volTetMesh);
-  oneToOneNodalMap->setSlave(surfMesh);
-  oneToOneNodalMap->compute();
-
-  // Scene Object
-  auto deformableObject = std::make_shared<imstk::PbdObject>("DeformableObject");
-  deformableObject->setCollidingGeometry(surfMesh);
-  deformableObject->setVisualGeometry(surfMesh);
-  deformableObject->setPhysicsGeometry(volTetMesh);
-  deformableObject->setPhysicsToCollidingMap(oneToOneNodalMap);
-  deformableObject->setPhysicsToVisualMap(oneToOneNodalMap);
-  deformableObject->setCollidingToVisualMap(oneToOneNodalMap);
-
-  // Create model
-  this->DeformableModel = std::make_shared<imstk::PbdModel>();
-  this->DeformableModel->setModelGeometry(volTetMesh);
-  this->DeformableModel->configure( //\todo Make this configurable
-    /*Number of Constraints*/ 1,
-    /*Constraint configuration*/ "FEM NeoHookean 1.0 0.3",
-    /*Mass*/ 1.0,
-    /*Gravity*/ "0 0 -9.8",
-    /*TimeStep*/ 0.001,
-    /*FixedPoint*/ "",
-    /*NumberOfIterationInConstraintSolver*/ 2,
-    /*Proximity*/ 0.1,
-    /*Contact stiffness*/ 0.01
-  );
-  deformableObject->setDynamicalModel(this->DeformableModel);
-
-  // Create solver
-  auto pbdSolver = std::make_shared<imstk::PbdSolver>();
-  pbdSolver->setPbdObject(deformableObject);
-
-  scene->addNonlinearSolver(pbdSolver);
-  scene->addSceneObject(deformableObject);
+  // Build mesh geometry
+  vtkSmartPointer<vtkMRMLCommandLineModuleNode> meshParameters =
+    vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
+      q->simulationLogic()->DefaultDeformableObjectParameterNode());
+  q->simulationLogic()->AddDeformableObject(
+    "CollisionSimulation",
+    this->InputMeshNode,
+    meshParameters.GetPointer());
+  this->InputMeshNodeName = this->InputMeshNode->GetName();
 
   // Build floor geometry
-  // Same thing for the floor
-  // Construct one to one nodal map based on the above meshes
-  auto oneToOneFloorNodalMap = std::make_shared<imstk::OneToOneMap>();
-  oneToOneFloorNodalMap->setMaster(floorMesh);
-  oneToOneFloorNodalMap->setSlave(floorMesh);
-  oneToOneFloorNodalMap->compute();
-
-  auto floor = std::make_shared<imstk::PbdObject>("Floor");
-  floor->setCollidingGeometry(floorMesh);
-  floor->setVisualGeometry(floorMesh);
-  floor->setPhysicsGeometry(floorMesh);
-  floor->setPhysicsToCollidingMap(oneToOneFloorNodalMap);
-  floor->setPhysicsToVisualMap(oneToOneFloorNodalMap);
-  floor->setCollidingToVisualMap(oneToOneFloorNodalMap);
-
-  auto pbdFloorModel = std::make_shared<imstk::PbdModel>();
-  pbdFloorModel->setModelGeometry(floorMesh);
-  pbdFloorModel->configure(/*Number of Constraints*/ 0,
-    /*Mass*/ 0.0,
-    /*Proximity*/ 0.1,
-    /*Contact stiffness*/ 1.0);
-  floor->setDynamicalModel(pbdFloorModel);
-
-  auto pbdSolverfloor = std::make_shared<imstk::PbdSolver>();
-  pbdSolverfloor->setPbdObject(floor);
-
-  scene->addNonlinearSolver(pbdSolverfloor);
-  scene->addSceneObject(floor);
+  vtkSmartPointer<vtkMRMLCommandLineModuleNode> floorParameters =
+    vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
+      q->simulationLogic()->DefaultImmovableObjectParameterNode());
+  q->simulationLogic()->AddImmovableObject(
+    "CollisionSimulation",
+    this->FloorMeshNode,
+    floorParameters.GetPointer());
 
   // Collisions
-  auto colGraph = scene->getCollisionGraph();
-  auto pair = std::make_shared<imstk::PbdInteractionPair>(
-    imstk::PbdInteractionPair(deformableObject, floor));
-  pair->setNumberOfInterations(2);
-
-  colGraph->addInteractionPair(pair);
+  q->simulationLogic()->AddCollisionInteraction(
+    this->InputMeshNode->GetName(), this->FloorMeshNode->GetName());
 
   // Set the scene
   q->simulationLogic()->SetActiveScene("CollisionSimulation", true);
@@ -471,25 +385,6 @@ void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
   Q_ASSERT(d->OutputMeshNode && d->OutputMeshNode->GetUnstructuredGrid());
-  if (!d->DeformableModel)
-    {
-    return;
-    }
-
-  imstk::StdVectorOfVec3d newPoints =
-    d->DeformableModel->getCurrentState()->getPositions();
-
-  int wasModifying = d->OutputMeshNode->StartModify();
-  vtkUnstructuredGrid* data = d->OutputMeshNode->GetUnstructuredGrid();
-  vtkPoints* dataPoints = data->GetPoints();
-
-  for (int i = 0; i < dataPoints->GetNumberOfPoints(); i++)
-    {
-    dataPoints->SetPoint(i, newPoints[i][0], newPoints[i][1], newPoints[i][2]);
-    }
-  data->SetPoints(dataPoints);
-  data->Modified();
-
-  d->OutputMeshNode->SetAndObserveMesh(data);
-  d->OutputMeshNode->EndModify(wasModifying);
+  this->simulationLogic()->UpdateMeshPointsFromObject(
+    d->InputMeshNodeName, d->OutputMeshNode);
 }

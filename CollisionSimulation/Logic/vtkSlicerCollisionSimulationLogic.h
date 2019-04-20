@@ -28,6 +28,11 @@
 #include "vtkSlicerModuleLogic.h"
 
 // MRML includes
+class vtkMRMLCommandLineModuleNode;
+class vtkMRMLModelNode;
+
+// VTK includes
+class vtkUnstructuredGrid;
 
 // iMSTK includes
 #include <imstkSimulationManager.h>
@@ -77,9 +82,79 @@ public:
   /// Set the active scene on the SDK.
   void SetActiveScene(const std::string& name, bool unloadPrevious = true);
 
+  /// imstk collision
+  ///
+  /// Add collision interaction between the two objects.
+  /// They must be in the scene.
+  void AddCollisionInteraction(
+    const std::string& obj1, const std::string& obj2);
+  void AddCollisionInteraction(
+    const std::string& name,
+    const std::string& obj1, const std::string& obj2);
+
+  /// imstk immovable object
+  ///
+  /// Add an immovable object to the given scene. The model must have an
+  /// unstructured grid.
+  void AddImmovableObject(
+    const std::string& name,
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
+  /// Add an immovable object to the active scene. The model must have an
+  /// unstructured grid.
+  void AddImmovableObject(
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
+
+  /// Create a parameter node with default values for immovable objects.
+  /// The returned node is NOT added to the scene.
+  /// You are responsible for deleting the returned node.
+  vtkMRMLCommandLineModuleNode* DefaultImmovableObjectParameterNode();
+
+  /// imstk deformable object
+  ///
+  /// Add a deformable object to the given scene. The model must have an
+  /// unstructured grid.
+  void AddDeformableObject(
+    const std::string& name,
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
+  /// Add an deformable object to the active scene. The model must have an
+  /// unstructured grid.
+  void AddDeformableObject(
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
+
+  /// Create a parameter node with default values for deformable objects.
+  /// The returned node is NOT added to the scene.
+  /// You are responsible for deleting the returned node.
+  vtkMRMLCommandLineModuleNode* DefaultDeformableObjectParameterNode();
+
+  /// Mesh updates methods
+  ///
+  /// Update the given polydata points from the given object name in the
+  /// active scene
+  void UpdateMeshPointsFromObject(
+    const std::string& objectName, vtkUnstructuredGrid* mesh);
+  void UpdateMeshPointsFromObject(
+    const std::string& objectName, vtkMRMLModelNode* mesh);
+
 protected:
   vtkSlicerCollisionSimulationLogic();
   virtual ~vtkSlicerCollisionSimulationLogic();
+
+  void AddImmovableObject(
+    std::shared_ptr<imstk::Scene> scene,
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
+  void AddCollisionInteraction(
+    std::shared_ptr<imstk::Scene> scene,
+    const std::string& obj1,
+    const std::string& obj2);
+  void AddDeformableObject(
+    std::shared_ptr<imstk::Scene> scene,
+    vtkMRMLModelNode* modelNode,
+    vtkMRMLCommandLineModuleNode* parameterNode);
 
 private:
   vtkSlicerCollisionSimulationLogic(const vtkSlicerCollisionSimulationLogic&); // Not implemented
