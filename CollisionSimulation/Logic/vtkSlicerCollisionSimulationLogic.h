@@ -26,6 +26,7 @@
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
+#include <map>
 
 // MRML includes
 class vtkMRMLCommandLineModuleNode;
@@ -36,6 +37,11 @@ class vtkUnstructuredGrid;
 
 // iMSTK includes
 #include <imstkSimulationManager.h>
+#include <imstkMeshIO.h>
+#include <imstkOneToOneMap.h>
+#include <imstkPbdModel.h>
+#include <imstkPbdObject.h>
+#include <imstkPbdSolver.h>
 
 // STD includes
 #include <cstdlib>
@@ -99,12 +105,12 @@ public:
   void AddImmovableObject(
     const std::string& name,
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double dt);
   /// Add an immovable object to the active scene. The model must have an
   /// unstructured grid.
   void AddImmovableObject(
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double dt);
 
   /// Create a parameter node with default values for immovable objects.
   /// The returned node is NOT added to the scene.
@@ -118,12 +124,12 @@ public:
   void AddDeformableObject(
     const std::string& name,
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double gravity, double stiffness, double dt, double youngs, double poisson);
   /// Add an deformable object to the active scene. The model must have an
   /// unstructured grid.
   void AddDeformableObject(
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double gravity, double stiffness, double dt, double youngs, double poisson);
 
   /// Create a parameter node with default values for deformable objects.
   /// The returned node is NOT added to the scene.
@@ -146,7 +152,7 @@ protected:
   void AddImmovableObject(
     std::shared_ptr<imstk::Scene> scene,
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double dt);
   void AddCollisionInteraction(
     std::shared_ptr<imstk::Scene> scene,
     const std::string& obj1,
@@ -154,13 +160,18 @@ protected:
   void AddDeformableObject(
     std::shared_ptr<imstk::Scene> scene,
     vtkMRMLModelNode* modelNode,
-    vtkMRMLCommandLineModuleNode* parameterNode);
+    double gravity, double stiffness, double dt, double youngs, double poisson);
 
 private:
   vtkSlicerCollisionSimulationLogic(const vtkSlicerCollisionSimulationLogic&); // Not implemented
   void operator=(const vtkSlicerCollisionSimulationLogic&); // Not implemented
 
   std::shared_ptr<imstk::SimulationManager> SDK;
+  std::map < std::string, std::shared_ptr<imstk::PbdObject>> m_Objects;
+  std::map < std::string, std::shared_ptr<imstk::SurfaceMesh>> m_Meshes;
+  std::map < std::string, std::shared_ptr<imstk::PbdSolver>> m_Solvers;
+
+
 };
 
 #endif

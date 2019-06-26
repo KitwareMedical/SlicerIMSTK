@@ -71,6 +71,7 @@ public:
   vtkMRMLModelNode* OutputMeshNode;
 
   std::string InputMeshNodeName;
+  int index;
 
   // \todo Expose these ?
   const double scalingFactor = 1.;
@@ -93,6 +94,7 @@ qSlicerCollisionSimulationModuleWidgetPrivate
   this->InputMeshNode = nullptr;
   this->FloorMeshNode = nullptr;
   this->OutputMeshNode = nullptr;
+  this->index = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -108,19 +110,20 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
 {
   Q_Q(qSlicerCollisionSimulationModuleWidget);
   // Do you need to have two models ? One to follow and one to deform ?
-
+  this->index++;
   // Create a new scene
-  q->simulationLogic()->CreateScene("CollisionSimulation", false);
-  auto scene = this->SDK()->getScene("CollisionSimulation");
+  std::string sceneName = "CollisionSimulation" + std::to_string(this->index);
+  q->simulationLogic()->CreateScene(sceneName, false);
+  auto scene = this->SDK()->getScene(sceneName);
 
   // Build mesh geometry
   vtkSmartPointer<vtkMRMLCommandLineModuleNode> meshParameters =
     vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
       q->simulationLogic()->DefaultDeformableObjectParameterNode());
   q->simulationLogic()->AddDeformableObject(
-    "CollisionSimulation",
-    this->InputMeshNode,
-    meshParameters.GetPointer());
+    sceneName,
+    this->InputMeshNode, this->Gravity->value(), this->Stiffness->value(), this->Dt->value(),
+    this->Youngs->value(), this->Poisson->value());
   this->InputMeshNodeName = this->InputMeshNode->GetName();
 
   // Build floor geometry
@@ -128,16 +131,16 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
     vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
       q->simulationLogic()->DefaultImmovableObjectParameterNode());
   q->simulationLogic()->AddImmovableObject(
-    "CollisionSimulation",
+    sceneName,
     this->FloorMeshNode,
-    floorParameters.GetPointer());
+    this->Dt->value());
 
   // Collisions
-  q->simulationLogic()->AddCollisionInteraction(
+  q->simulationLogic()->AddCollisionInteraction(sceneName,
     this->InputMeshNode->GetName(), this->FloorMeshNode->GetName());
 
   // Set the scene
-  q->simulationLogic()->SetActiveScene("CollisionSimulation", true);
+  q->simulationLogic()->SetActiveScene(sceneName, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -345,6 +348,8 @@ void qSlicerCollisionSimulationModuleWidget::startSimulation()
   d->setupSimulation();
   d->setupOutput();
   d->MeshUpdateTimer.start();
+  vtkMRMLDisplayNode* outputDisplayNode = d->InputMeshNode->GetDisplayNode();
+  outputDisplayNode->VisibilityOff();
   d->SDK()->startSimulation(imstk::SimulationStatus::RUNNING);
   this->updateWidgetFromMRML();
 }
