@@ -28,6 +28,8 @@
 #include <vtkMRMLCommandLineModuleNode.h>
 #include <vtkMRMLDisplayNode.h>
 #include <vtkMRMLModelNode.h>
+#include <vtkMRMLLinearTransformNode.h>
+#include <vtkMRMLTransformDisplayNode.h>
 
 // VTK includes
 #include <vtkUnstructuredGrid.h>
@@ -43,6 +45,7 @@
 #include <imstkSimulationManager.h>
 #include <imstkSurfaceMesh.h>
 #include <imstkTetrahedralMesh.h>
+#include <vtkMRMLScene.h>
 
 // Qt includes
 #include <QDebug>
@@ -61,6 +64,7 @@ public:
 
   void setupSimulation();
   void setupOutput();
+  void setupFloorTransform();
 
   std::shared_ptr<imstk::SimulationManager> SDK();
 
@@ -69,6 +73,8 @@ public:
   vtkMRMLModelNode* InputMeshNode;
   vtkMRMLModelNode* FloorMeshNode;
   vtkMRMLModelNode* OutputMeshNode;
+  vtkSmartPointer<vtkMRMLLinearTransformNode> FloorTransformNode;
+  vtkMRMLScene* scene;
 
   std::string InputMeshNodeName;
   int index;
@@ -94,6 +100,8 @@ qSlicerCollisionSimulationModuleWidgetPrivate
   this->InputMeshNode = nullptr;
   this->FloorMeshNode = nullptr;
   this->OutputMeshNode = nullptr;
+  this->FloorTransformNode = nullptr;
+  this->scene = nullptr;
   this->index = -1;
 }
 
@@ -103,6 +111,27 @@ qSlicerCollisionSimulationModuleWidgetPrivate::SDK()
 {
   Q_Q(qSlicerCollisionSimulationModuleWidget);
   return q->simulationLogic()->GetSDK();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerCollisionSimulationModuleWidgetPrivate::setupFloorTransform()
+{
+  if (this->FloorTransformNode)
+  {
+    this->scene->RemoveNode(this->FloorTransformNode);
+    this->FloorTransformNode = nullptr;
+  }
+
+  this->FloorTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::New();
+  this->FloorTransformNode->SetName(this->FloorMeshNode->GetName());
+  this->scene->AddNode(this->FloorTransformNode);
+  this->FloorTransformNode->CreateDefaultDisplayNodes();
+  this->FloorMeshNode->SetAndObserveTransformNodeID(this->FloorTransformNode->GetID());
+  auto disp = this->FloorTransformNode->GetDisplayNode();
+  auto transform_disp = vtkMRMLTransformDisplayNode::SafeDownCast(disp);
+  transform_disp->SetEditorScalingEnabled(false);
+  transform_disp->SetEditorVisibility(true);
+  transform_disp->UpdateEditorBounds();
 }
 
 //-----------------------------------------------------------------------------
@@ -134,6 +163,9 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
     sceneName,
     this->FloorMeshNode,
     this->Dt->value());
+
+  //Attach controller to floor geometry;
+  q->simulationLogic()->AttachTransformController(sceneName, this->FloorMeshNode->GetName(), this->FloorTransformNode);
 
   // Collisions
   q->simulationLogic()->AddCollisionInteraction(sceneName,
@@ -183,6 +215,7 @@ vtkSlicerCollisionSimulationLogic* qSlicerCollisionSimulationModuleWidget::simul
 void qSlicerCollisionSimulationModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
+  d->scene = scene;
   d->inputMeshNodeComboBox->setMRMLScene(scene);
   d->floorMeshNodeComboBox->setMRMLScene(scene);
   d->outputMeshNodeComboBox->setMRMLScene(scene);
@@ -292,7 +325,7 @@ void qSlicerCollisionSimulationModuleWidget::setup()
     );
 
   // Timer setup
-  d->MeshUpdateTimer.setInterval(7);
+  d->MeshUpdateTimer.setInterval(10);
   d->MeshUpdateTimer.connect(
     &(d->MeshUpdateTimer), SIGNAL(timeout()),
     this, SLOT(updateFromSimulation()));
@@ -344,7 +377,8 @@ int qSlicerCollisionSimulationModuleWidget::simulationStatus()
 void qSlicerCollisionSimulationModuleWidget::startSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
-
+  
+  d->setupFloorTransform();
   d->setupSimulation();
   d->setupOutput();
   d->MeshUpdateTimer.start();
@@ -392,4 +426,6 @@ void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
   Q_ASSERT(d->OutputMeshNode && d->OutputMeshNode->GetUnstructuredGrid());
   this->simulationLogic()->UpdateMeshPointsFromObject(
     d->InputMeshNodeName, d->OutputMeshNode);
+  this->simulationLogic()->UpdateControllerFromTransform(d->FloorTransformNode);
 }
+

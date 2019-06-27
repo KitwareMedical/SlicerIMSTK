@@ -20,6 +20,7 @@
 
 // MRML includes
 #include <vtkMRMLCommandLineModuleNode.h>
+#include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLModelNode.h>
 #include <vtkMRMLNode.h>
 #include <vtkMRMLScene.h>
@@ -35,6 +36,8 @@
 #include <imstkPbdSolver.h>
 #include "imstkMeshToMeshBruteforceCD.h"
 #include "imstkPBDCollisionHandling.h"
+#include "imstkDummyClient.h"
+#include "imstkSceneObjectController.h"
 
 
 
@@ -250,6 +253,7 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   C2VMap->compute();
 
   auto obj = std::make_shared<imstk::PbdObject>(modelNode->GetName());
+  auto c_obj = std::make_shared<imstk::CollidingObject>(modelNode->GetName());
   obj->setCollidingGeometry(surfMesh);
   obj->addVisualModel(surfMeshModel);
   obj->setPhysicsGeometry(surfMesh);
@@ -257,14 +261,18 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   obj->setPhysicsToVisualMap(P2VMap);
   obj->setCollidingToVisualMap(C2VMap);
 
+  c_obj->setCollidingGeometry(surfMesh);
+  c_obj->setVisualGeometry(surfMesh);
+  c_obj->setCollidingToVisualMap(C2VMap);
+
   auto pbdFloorModel = std::make_shared<imstk::PbdModel>();
   pbdFloorModel->setModelGeometry(surfMesh);
 
   auto pbdParams2 = std::make_shared<imstk::PBDModelConfig>();
   pbdParams2->m_uniformMassValue = 0.0;
   pbdParams2->m_proximity = 0.1;
-  pbdParams2->m_contactStiffness = 10.0;
-  pbdParams2->m_dt = dt;
+  pbdParams2->m_contactStiffness = 1.0;
+  //pbdParams2->m_dt = dt;
 
 
   pbdFloorModel->configure(pbdParams2);
@@ -473,6 +481,94 @@ void vtkSlicerCollisionSimulationLogic
   modelNode->EndModify(wasModifying);
 }
 
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  auto scene = this->SDK->getActiveScene();
+  if (!scene)
+  {
+    std::cout << "No scene" << std::endl;
+
+    return;
+  }
+
+  this->AttachTransformController(scene->getName(), objectName, transform);
+}
+
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& name, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform || objectName.empty())
+  {
+    std::cout << "No transform" << std::endl;
+
+    return;
+  }
+
+  auto scene = this->SDK->getScene(name);
+  if (!scene)
+  {
+    std::cout << "No scene" << std::endl;
+
+    return;
+  }
+
+  auto object =
+    std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));
+
+  auto client_name = objectName + "_Controller";
+
+  auto client = std::make_shared<imstk::DummyClient>(client_name);
+
+  auto trackCtrl = std::make_shared<imstk::DeviceTracker>(client);
+  //trackCtrl->setTranslationScaling(0.1);
+  auto controller = std::make_shared<imstk::SceneObjectController>(object, trackCtrl);
+  scene->addObjectController(controller);
+  std::cout << "Controller added" << std::endl;
+  this->m_TransformClients[transform->GetName()] = client;
+}
+
+void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform)
+  {
+    return;
+    std::cout << "No transform" << std::endl;
+  }
+  
+  auto scene = this->SDK->getActiveScene();
+  if (!scene)
+  {
+    return;
+    std::cout << "No scene" << std::endl;
+
+  }
+
+  auto client =
+    this->m_TransformClients[transform->GetName()];
+
+  //client->s
+
+  if (!client)
+  {
+    return;
+    std::cout << "No client" << std::endl;
+
+  }
+
+  vtkNew<vtkMatrix4x4> matrix;
+  transform->GetMatrixTransformToParent(matrix.GetPointer());
+  imstk::Vec3d p;
+  p[0] = matrix->GetElement(0, 3);
+  p[1] = matrix->GetElement(1, 3);
+  p[2] = matrix->GetElement(2, 3);
+  client->setPosition(p);
+
+  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
+  imstk::Quatd qor(orient);
+  client->setOrientation(qor);
+
+
+}
+
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic
 ::UpdateMeshPointsFromObject(const std::string& objectName, vtkUnstructuredGrid* mesh)
@@ -487,6 +583,7 @@ void vtkSlicerCollisionSimulationLogic
   {
     return;
   }
+
 
   auto object =
     std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));

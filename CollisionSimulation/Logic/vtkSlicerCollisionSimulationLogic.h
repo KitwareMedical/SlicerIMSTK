@@ -31,6 +31,7 @@
 // MRML includes
 class vtkMRMLCommandLineModuleNode;
 class vtkMRMLModelNode;
+class vtkMRMLLinearTransformNode;
 
 // VTK includes
 class vtkUnstructuredGrid;
@@ -42,6 +43,7 @@ class vtkUnstructuredGrid;
 #include <imstkPbdModel.h>
 #include <imstkPbdObject.h>
 #include <imstkPbdSolver.h>
+#include <imstkDummyClient.h>
 
 // STD includes
 #include <cstdlib>
@@ -145,6 +147,16 @@ public:
   void UpdateMeshPointsFromObject(
     const std::string& objectName, vtkMRMLModelNode* mesh);
 
+  //Add a controller to an object
+  void AttachTransformController(const std::string& objectName, vtkMRMLLinearTransformNode* transform);
+
+  //Add a controller to an object
+  void AttachTransformController(const std::string& name, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
+
+  void UpdateControllerFromTransform(vtkMRMLLinearTransformNode* transform);
+
+  
+
 protected:
   vtkSlicerCollisionSimulationLogic();
   virtual ~vtkSlicerCollisionSimulationLogic();
@@ -170,6 +182,7 @@ private:
   std::map < std::string, std::shared_ptr<imstk::PbdObject>> m_Objects;
   std::map < std::string, std::shared_ptr<imstk::SurfaceMesh>> m_Meshes;
   std::map < std::string, std::shared_ptr<imstk::PbdSolver>> m_Solvers;
+  std::map < std::string, std::shared_ptr<imstk::DummyClient>> m_TransformClients;
 
 
 };
