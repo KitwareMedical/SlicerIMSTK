@@ -20,6 +20,7 @@
 
 // MRML includes
 #include <vtkMRMLCommandLineModuleNode.h>
+#include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLModelNode.h>
 #include <vtkMRMLNode.h>
 #include <vtkMRMLScene.h>
@@ -33,6 +34,12 @@
 #include <imstkPbdModel.h>
 #include <imstkPbdObject.h>
 #include <imstkPbdSolver.h>
+#include "imstkMeshToMeshBruteforceCD.h"
+#include "imstkPBDCollisionHandling.h"
+#include "imstkDummyClient.h"
+#include "imstkSceneObjectController.h"
+
+
 
 // VTK includes
 #include <vtkIntArray.h>
@@ -121,7 +128,7 @@ void vtkSlicerCollisionSimulationLogic
 ::CreateScene(const std::string& name, bool makeActive)
 {
   auto scene = this->GetSDK()->createNewScene(name);
-  this->GetSDK()->addScene(scene);
+  //this->GetSDK()->addScene(scene);
   if (makeActive)
   {
     this->SetActiveScene(name);
@@ -158,24 +165,24 @@ void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
 void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   const std::string& name,
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double dt)
 {
   this->AddImmovableObject(
     this->GetSDK()->getScene(name),
     modelNode,
-    parameterNode
+    dt
   );
 }
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double dt)
 {
   this->AddImmovableObject(
     this->GetSDK()->getActiveScene(),
     modelNode,
-    parameterNode
+    dt
   );
 }
 
@@ -196,11 +203,10 @@ vtkMRMLCommandLineModuleNode* vtkSlicerCollisionSimulationLogic
 void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   std::shared_ptr<imstk::Scene> scene,
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double dt)
 {
   if (!scene
-    || !modelNode
-    || !parameterNode)
+    || !modelNode)
   {
     std::cerr << "Cannot add immovable object - wrong input" << std::endl;
     return;
@@ -220,32 +226,56 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
     vtkWarningMacro("Unable to delete temporary file");
   }
 
-  auto oneToOneFloorNodalMap = std::make_shared<imstk::OneToOneMap>();
-  oneToOneFloorNodalMap->setMaster(mesh);
-  oneToOneFloorNodalMap->setSlave(mesh);
-  oneToOneFloorNodalMap->compute();
+  auto volTetMesh = std::dynamic_pointer_cast<imstk::TetrahedralMesh>(mesh);
+  volTetMesh->scale(1.0, imstk::Geometry::TransformType::ApplyToData);
+  auto surfMesh = std::make_shared<imstk::SurfaceMesh>();
+  volTetMesh->extractSurfaceMesh(surfMesh, true);
+
+  auto material = std::make_shared<imstk::RenderMaterial>();
+  material->setDisplayMode(imstk::RenderMaterial::DisplayMode::WIREFRAME_SURFACE);
+  auto surfMeshModel = std::make_shared<imstk::VisualModel>(surfMesh);
+  surfMeshModel->setRenderMaterial(material);
+
+
+  auto P2CMap = std::make_shared<imstk::OneToOneMap>();
+  P2CMap->setMaster(surfMesh);
+  P2CMap->setSlave(surfMesh);
+  P2CMap->compute();
+
+  auto P2VMap = std::make_shared<imstk::OneToOneMap>();
+  P2VMap->setMaster(surfMesh);
+  P2VMap->setSlave(surfMesh);
+  P2VMap->compute();
+
+  auto C2VMap = std::make_shared<imstk::OneToOneMap>();
+  C2VMap->setMaster(surfMesh);
+  C2VMap->setSlave(surfMesh);
+  C2VMap->compute();
 
   auto obj = std::make_shared<imstk::PbdObject>(modelNode->GetName());
-  obj->setCollidingGeometry(mesh);
-  obj->setVisualGeometry(mesh);
-  obj->setPhysicsGeometry(mesh);
-  obj->setPhysicsToCollidingMap(oneToOneFloorNodalMap);
-  obj->setPhysicsToVisualMap(oneToOneFloorNodalMap);
-  obj->setCollidingToVisualMap(oneToOneFloorNodalMap);
+  auto c_obj = std::make_shared<imstk::CollidingObject>(modelNode->GetName());
+  obj->setCollidingGeometry(surfMesh);
+  obj->addVisualModel(surfMeshModel);
+  obj->setPhysicsGeometry(surfMesh);
+  obj->setPhysicsToCollidingMap(P2CMap);
+  obj->setPhysicsToVisualMap(P2VMap);
+  obj->setCollidingToVisualMap(C2VMap);
+
+  c_obj->setCollidingGeometry(surfMesh);
+  c_obj->setVisualGeometry(surfMesh);
+  c_obj->setCollidingToVisualMap(C2VMap);
 
   auto pbdFloorModel = std::make_shared<imstk::PbdModel>();
-  pbdFloorModel->setModelGeometry(mesh);
+  pbdFloorModel->setModelGeometry(surfMesh);
 
-  double constraints = atof(parameterNode->GetParameterAsString("Number of constraints").c_str());
-  double mass = atof(parameterNode->GetParameterAsString("Mass").c_str());
-  double proximity = atof(parameterNode->GetParameterAsString("Proximity").c_str());
-  double stiffness = atof(parameterNode->GetParameterAsString("Contact stiffness").c_str());
+  auto pbdParams2 = std::make_shared<imstk::PBDModelConfig>();
+  pbdParams2->m_uniformMassValue = 0.0;
+  pbdParams2->m_proximity = 0.1;
+  pbdParams2->m_contactStiffness = 1.0;
+  //pbdParams2->m_dt = dt;
 
-  pbdFloorModel->configure(/*Number of Constraints*/ constraints,
-    /*Mass*/ mass,
-    /*Proximity*/ proximity,
-    /*Contact stiffness*/ stiffness
-  );
+
+  pbdFloorModel->configure(pbdParams2);
   obj->setDynamicalModel(pbdFloorModel);
 
   auto pbdSolverfloor = std::make_shared<imstk::PbdSolver>();
@@ -253,6 +283,9 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
 
   scene->addNonlinearSolver(pbdSolverfloor);
   scene->addSceneObject(obj);
+  this->m_Objects[modelNode->GetName()] = obj;
+  this->m_Meshes[modelNode->GetName()] = surfMesh;
+  this->m_Solvers[modelNode->GetName()] = pbdSolverfloor;
 }
 
 //----------------------------------------------------------------------------
@@ -274,37 +307,50 @@ void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
     return;
   }
 
-  // Collisions
-  auto colGraph = scene->getCollisionGraph();
-  auto pair = std::make_shared<imstk::PbdInteractionPair>(
-    imstk::PbdInteractionPair(pbdObj1, pbdObj2));
-  pair->setNumberOfInterations(2);
+  auto mesh1 = this->m_Meshes[obj1];
+  auto mesh2 = this->m_Meshes[obj2];
+ 
+  auto solver = this->m_Solvers[obj1];
+  //// Collisions
+  auto colData = std::make_shared<imstk::CollisionData>();
+  auto CD = std::make_shared<imstk::MeshToMeshBruteForceCD>(mesh1, mesh2, colData);
 
-  colGraph->addInteractionPair(pair);
+  auto CH = std::make_shared<imstk::PBDCollisionHandling>(imstk::CollisionHandling::Side::AB,
+    CD->getCollisionData(), pbdObj1, pbdObj2, solver); //fix this!!!!
+  scene->getCollisionGraph()->addInteractionPair(pbdObj1, pbdObj2, CD, CH, nullptr);
+
 }
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   const std::string& name,
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double gravity, double stiffness, double dt, double youngs, double poisson)
 {
   this->AddDeformableObject(
     this->GetSDK()->getScene(name),
     modelNode,
-    parameterNode
+    gravity,
+    stiffness,
+    dt,
+    youngs,
+    poisson
   );
 }
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double gravity, double stiffness, double dt, double youngs, double poisson)
 {
   this->AddDeformableObject(
     this->GetSDK()->getActiveScene(),
     modelNode,
-    parameterNode
+    gravity,
+    stiffness,
+    dt,
+    youngs,
+    poisson
   );
 }
 
@@ -330,11 +376,10 @@ vtkMRMLCommandLineModuleNode* vtkSlicerCollisionSimulationLogic
 void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   std::shared_ptr<imstk::Scene> scene,
   vtkMRMLModelNode* modelNode,
-  vtkMRMLCommandLineModuleNode* parameterNode)
+  double gravity, double stiffness, double dt, double youngs, double poisson)
 {
   if (!scene
-    || !modelNode
-    || !parameterNode)
+    || !modelNode)
   {
     std::cerr << "Cannot add deformable object - wrong input" << std::endl;
     return;
@@ -360,43 +405,55 @@ void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   auto surfMesh = std::make_shared<imstk::SurfaceMesh>();
   volTetMesh->extractSurfaceMesh(surfMesh, true);
 
-  auto oneToOneFloorNodalMap = std::make_shared<imstk::OneToOneMap>();
-  oneToOneFloorNodalMap->setMaster(mesh);
-  oneToOneFloorNodalMap->setSlave(mesh);
-  oneToOneFloorNodalMap->compute();
+  auto material = std::make_shared<imstk::RenderMaterial>();
+  material->setDisplayMode(imstk::RenderMaterial::DisplayMode::WIREFRAME_SURFACE);
+  auto surfMeshModel = std::make_shared<imstk::VisualModel>(surfMesh);
+  surfMeshModel->setRenderMaterial(material);
+
+
+  auto P2CMap = std::make_shared<imstk::OneToOneMap>();
+  P2CMap->setMaster(mesh);
+  P2CMap->setSlave(surfMesh);
+  P2CMap->compute();
+
+  auto P2VMap = std::make_shared<imstk::OneToOneMap>();
+  P2VMap->setMaster(mesh);
+  P2VMap->setSlave(surfMesh);
+  P2VMap->compute();
+
+  auto C2VMap = std::make_shared<imstk::OneToOneMap>();
+  C2VMap->setMaster(surfMesh);
+  C2VMap->setSlave(surfMesh);
+  C2VMap->compute();
 
   auto obj = std::make_shared<imstk::PbdObject>(modelNode->GetName());
-  obj->setCollidingGeometry(mesh);
-  obj->setVisualGeometry(mesh);
-  obj->setPhysicsGeometry(mesh);
-  obj->setPhysicsToCollidingMap(oneToOneFloorNodalMap);
-  obj->setPhysicsToVisualMap(oneToOneFloorNodalMap);
-  obj->setCollidingToVisualMap(oneToOneFloorNodalMap);
+  obj->setCollidingGeometry(surfMesh);
+  obj->addVisualModel(surfMeshModel);
+  obj->setPhysicsGeometry(volTetMesh);
+  obj->setPhysicsToCollidingMap(P2CMap);
+  obj->setPhysicsToVisualMap(P2VMap);
+  obj->setCollidingToVisualMap(C2VMap);
 
   auto pbdFloorModel = std::make_shared<imstk::PbdModel>();
   pbdFloorModel->setModelGeometry(mesh);
 
-  double constraints = atof(parameterNode->GetParameterAsString("Number of constraints").c_str());
-  std::string config = parameterNode->GetParameterAsString("Constraint configuration");
-  double mass = atof(parameterNode->GetParameterAsString("Mass").c_str());
-  std::string gravity = parameterNode->GetParameterAsString("Gravity");
-  double timestep = atof(parameterNode->GetParameterAsString("Time Step").c_str());
-  std::string fixedPoint = parameterNode->GetParameterAsString("Fixed point");
-  double solverConstraints = atof(parameterNode->GetParameterAsString("Number of iteration in constraint solver").c_str());
-  double proximity = atof(parameterNode->GetParameterAsString("Proximity").c_str());
-  double stiffness = atof(parameterNode->GetParameterAsString("Contact stiffness").c_str());
+  auto pbdParams = std::make_shared<imstk::PBDModelConfig>();
 
-  pbdFloorModel->configure(
-    /*Number of Constraints*/ constraints,
-    /*Constraint configuration*/ config,
-    /*Mass*/ mass,
-    /*Gravity*/ gravity,
-    /*TimeStep*/ timestep,
-    /*FixedPoint*/ fixedPoint,
-    /*NumberOfIterationInConstraintSolver*/ solverConstraints,
-    /*Proximity*/ proximity,
-    /*Contact stiffness*/ stiffness
-  );
+  // FEM constraint
+  pbdParams->m_YoungModulus = youngs;
+  pbdParams->m_PoissonRatio = poisson;
+  pbdParams->enableFEMConstraint(imstk::PbdConstraint::Type::FEMTet, imstk::PbdFEMConstraint::MaterialType::NeoHookean);
+
+  // Other parameters
+  pbdParams->m_uniformMassValue = 1.0;
+  pbdParams->m_gravity = imstk::Vec3d(0, 0, -50*gravity);
+  pbdParams->m_dt = dt;
+  pbdParams->m_maxIter = 2;
+  pbdParams->m_proximity = 0.1;
+  pbdParams->m_contactStiffness = stiffness;
+
+
+  pbdFloorModel->configure(pbdParams);
   obj->setDynamicalModel(pbdFloorModel);
 
   auto pbdSolverfloor = std::make_shared<imstk::PbdSolver>();
@@ -404,6 +461,9 @@ void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
 
   scene->addNonlinearSolver(pbdSolverfloor);
   scene->addSceneObject(obj);
+  this->m_Objects[modelNode->GetName()] = obj;
+  this->m_Meshes[modelNode->GetName()] = surfMesh;
+  this->m_Solvers[modelNode->GetName()] = pbdSolverfloor;
 }
 
 //----------------------------------------------------------------------------
@@ -415,8 +475,98 @@ void vtkSlicerCollisionSimulationLogic
   {
     return;
   }
+  int wasModifying = modelNode->StartModify();
   this->UpdateMeshPointsFromObject(objectName, mesh);
   modelNode->SetAndObserveMesh(mesh);
+  modelNode->EndModify(wasModifying);
+}
+
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  auto scene = this->SDK->getActiveScene();
+  if (!scene)
+  {
+    std::cout << "No scene" << std::endl;
+
+    return;
+  }
+
+  this->AttachTransformController(scene->getName(), objectName, transform);
+}
+
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& name, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform || objectName.empty())
+  {
+    std::cout << "No transform" << std::endl;
+
+    return;
+  }
+
+  auto scene = this->SDK->getScene(name);
+  if (!scene)
+  {
+    std::cout << "No scene" << std::endl;
+
+    return;
+  }
+
+  auto object =
+    std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));
+
+  auto client_name = objectName + "_Controller";
+
+  auto client = std::make_shared<imstk::DummyClient>(client_name);
+
+  auto trackCtrl = std::make_shared<imstk::DeviceTracker>(client);
+  //trackCtrl->setTranslationScaling(0.1);
+  auto controller = std::make_shared<imstk::SceneObjectController>(object, trackCtrl);
+  scene->addObjectController(controller);
+  std::cout << "Controller added" << std::endl;
+  this->m_TransformClients[transform->GetName()] = client;
+}
+
+void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform)
+  {
+    return;
+    std::cout << "No transform" << std::endl;
+  }
+  
+  auto scene = this->SDK->getActiveScene();
+  if (!scene)
+  {
+    return;
+    std::cout << "No scene" << std::endl;
+
+  }
+
+  auto client =
+    this->m_TransformClients[transform->GetName()];
+
+  //client->s
+
+  if (!client)
+  {
+    return;
+    std::cout << "No client" << std::endl;
+
+  }
+
+  vtkNew<vtkMatrix4x4> matrix;
+  transform->GetMatrixTransformToParent(matrix.GetPointer());
+  imstk::Vec3d p;
+  p[0] = matrix->GetElement(0, 3);
+  p[1] = matrix->GetElement(1, 3);
+  p[2] = matrix->GetElement(2, 3);
+  client->setPosition(p);
+
+  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
+  imstk::Quatd qor(orient);
+  client->setOrientation(qor);
+
+
 }
 
 //----------------------------------------------------------------------------
@@ -433,6 +583,7 @@ void vtkSlicerCollisionSimulationLogic
   {
     return;
   }
+
 
   auto object =
     std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));
@@ -455,13 +606,15 @@ void vtkSlicerCollisionSimulationLogic
     return;
   }
 
-  imstk::StdVectorOfVec3d newPoints = model->getModelGeometry()->getVertexPositions();
+  imstk::StdVectorOfVec3d newPoints = model->getCurrentState()->getPositions();
 
   vtkPoints* dataPoints = mesh->GetPoints();
   for (int i = 0; i < dataPoints->GetNumberOfPoints(); i++)
   {
     dataPoints->SetPoint(i, newPoints[i][0], newPoints[i][1], newPoints[i][2]);
   }
+  mesh->SetPoints(dataPoints);
+  mesh->Modified();
 }
 
 //----------------------------------------------------------------------------

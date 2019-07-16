@@ -64,3 +64,9 @@ slicerMacroBuildLoadableModule(
 if(BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
+
+
+add_custom_command(TARGET qSlicer${MODULE_NAME}Module POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${iMSTK_SOURCE_DIR}/../iMSTK-build/bin/$<CONFIG>/assimp.dll"
+        $<TARGET_FILE_DIR:qSlicer${MODULE_NAME}Module>)
