@@ -165,7 +165,7 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
     this->Dt->value());
 
   //Attach controller to floor geometry;
-  q->simulationLogic()->AttachTransformController(sceneName, this->FloorMeshNode->GetName(), this->FloorTransformNode);
+  //q->simulationLogic()->AttachTransformController(sceneName, this->FloorMeshNode->GetName(), this->FloorTransformNode);
 
   // Collisions
   q->simulationLogic()->AddCollisionInteraction(sceneName,
@@ -378,7 +378,7 @@ void qSlicerCollisionSimulationModuleWidget::startSimulation()
 {
   Q_D(qSlicerCollisionSimulationModuleWidget);
   
-  d->setupFloorTransform();
+  //d->setupFloorTransform();
   d->setupSimulation();
   d->setupOutput();
   d->MeshUpdateTimer.start();

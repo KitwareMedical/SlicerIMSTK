@@ -446,7 +446,7 @@ void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
 
   // Other parameters
   pbdParams->m_uniformMassValue = 1.0;
-  pbdParams->m_gravity = imstk::Vec3d(0, 0, -100*gravity);
+  pbdParams->m_gravity = imstk::Vec3d(0, 0, -50*gravity);
   pbdParams->m_dt = dt;
   pbdParams->m_maxIter = 2;
   pbdParams->m_proximity = 0.1;
