@@ -27,7 +27,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
 
   ExternalProject_SetIfNotDefined(
     ${SUPERBUILD_TOPLEVEL_PROJECT}_${proj}_GIT_TAG
-    "9f4fd3be4a8910cc355033c15e86fe002c845b26"
+    "slicer-tbb-compatible"
     QUIET
     )
 
