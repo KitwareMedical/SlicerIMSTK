@@ -126,12 +126,14 @@ public:
     const std::string& objectName, vtkMRMLModelNode* mesh);
 
 
-  //Add a controller to an object in given scene
+  //Add a controller to an object in given scene, associated to a transform node
   void AttachTransformController(const std::string& sceneName, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
 
-  //Update the associated controller from transfom in the active scene
-  void UpdateControllerFromTransform(vtkMRMLLinearTransformNode* transform);
+  //Update the associated controller for transfom in the active scene, look up by transform - must match initial transform
+  void UpdateAssociatedController(vtkMRMLLinearTransformNode* transform);
 
+  //Update the associated controller for transfom in the active scene, look up by object - does not need to match initial transform
+  void UpdateControllerForObject(const std::string& sceneName, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
   
 
 protected:
@@ -156,10 +158,17 @@ private:
   void operator=(const vtkSlicerCollisionSimulationLogic&); // Not implemented
 
   std::shared_ptr<imstk::SimulationManager> SDK;
+
+  /* These maps are used to look up data objects that cannot be easily retrieved from the scene
+      Splitting the setup into multiple functions has made this useful.  See the collision interaction
+      setup for an example of why this is needed*/
+
+  //Lookup string is the name of the associated model node
   std::map < std::string, std::shared_ptr<imstk::PbdObject>> m_Objects;
   std::map < std::string, std::shared_ptr<imstk::SurfaceMesh>> m_Meshes;
   std::map < std::string, std::shared_ptr<imstk::PbdSolver>> m_Solvers;
-  std::map < std::string, std::shared_ptr<imstk::DummyClient>> m_TransformClients;
+  std::map < std::string, std::shared_ptr<imstk::DummyClient>> m_Controllers;
+
 
 
 };

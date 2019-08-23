@@ -463,7 +463,7 @@ void vtkSlicerCollisionSimulationLogic
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& name, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& sceneName, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
 {
   if (!transform || objectName.empty())
   {
@@ -472,7 +472,7 @@ void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::str
     return;
   }
 
-  auto scene = this->SDK->getScene(name);
+  auto scene = this->SDK->getScene(sceneName);
   if (!scene)
   {
     std::cout << "No scene" << std::endl;
@@ -491,11 +491,14 @@ void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::str
   auto controller = std::make_shared<imstk::SceneObjectController>(object, trackCtrl);
   scene->addObjectController(controller);
   std::cout << "Controller added" << std::endl;
-  this->m_TransformClients[transform->GetName()] = client;
+
+  //Add references to both object and transform - allow easer retrieval
+  this->m_Controllers[transform->GetName()] = client;
+  this->m_Controllers[objectName] = client;
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLinearTransformNode * transform)
+void vtkSlicerCollisionSimulationLogic::UpdateAssociatedController(vtkMRMLLinearTransformNode * transform)
 {
   if (!transform)
   {
@@ -512,7 +515,7 @@ void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLin
   }
 
   auto client =
-    this->m_TransformClients[transform->GetName()];
+    this->m_Controllers[transform->GetName()];
 
   //client->s
 
@@ -536,6 +539,48 @@ void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLin
   client->setOrientation(qor);
 
 
+}
+
+void vtkSlicerCollisionSimulationLogic::UpdateControllerForObject(const std::string & sceneName, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform)
+  {
+    return;
+    std::cout << "No transform" << std::endl;
+  }
+
+  auto scene = this->SDK->getScene(sceneName);
+  if (!scene)
+  {
+    return;
+    std::cout << "No scene" << std::endl;
+
+  }
+
+  //look up by object name
+  auto client =
+    this->m_Controllers[objectName];
+
+  //client->s
+
+  if (!client)
+  {
+    return;
+    std::cout << "No client" << std::endl;
+
+  }
+
+  vtkNew<vtkMatrix4x4> matrix;
+  transform->GetMatrixTransformToParent(matrix.GetPointer());
+  imstk::Vec3d p;
+  p[0] = matrix->GetElement(0, 3);
+  p[1] = matrix->GetElement(1, 3);
+  p[2] = matrix->GetElement(2, 3);
+  client->setPosition(p);
+
+  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
+  imstk::Quatd qor(orient);
+  client->setOrientation(qor);
 }
 
 

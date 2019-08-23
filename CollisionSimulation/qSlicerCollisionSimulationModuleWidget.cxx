@@ -400,6 +400,6 @@ void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
   Q_ASSERT(d->OutputMeshNode && d->OutputMeshNode->GetUnstructuredGrid());
   this->simulationLogic()->UpdateMeshPointsFromObject(
     d->InputMeshNodeName, d->OutputMeshNode);
-  this->simulationLogic()->UpdateControllerFromTransform(d->FloorTransformNode);
+  this->simulationLogic()->UpdateAssociatedController(d->FloorTransformNode);
 }
 
