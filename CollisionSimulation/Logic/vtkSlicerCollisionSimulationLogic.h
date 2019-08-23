@@ -105,7 +105,7 @@ public:
   void AddImmovableObject(
     const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
-    double dt);
+    double dt = 0.001);
   
   /// imstk deformable object
   ///
@@ -114,7 +114,7 @@ public:
   void AddDeformableObject(
     const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
-    double gravity, double stiffness, double dt, double youngs, double poisson, double mass);
+    double gravity = 9.8, double stiffness = 1.0, double dt = 0.001, double youngs = 0.5, double poisson = 0.3, double mass = 1.0);
     
   /// Mesh updates methods
   ///
