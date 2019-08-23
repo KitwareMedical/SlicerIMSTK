@@ -95,8 +95,6 @@ public:
   /// Add collision interaction between the two objects.
   /// They must be in the scene.
   void AddCollisionInteraction(
-    const std::string& obj1, const std::string& obj2);
-  void AddCollisionInteraction(
     const std::string& sceneName,
     const std::string& obj1, const std::string& obj2);
 
@@ -108,12 +106,7 @@ public:
     const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
     double dt);
-  /// Add an immovable object to the active scene. The model must have an
-  /// unstructured grid.
-  void AddImmovableObject(
-    vtkMRMLModelNode* modelNode,
-    double dt);  
-
+  
   /// imstk deformable object
   ///
   /// Add a deformable object to the given scene. The model must have an
@@ -122,12 +115,7 @@ public:
     const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
     double gravity, double stiffness, double dt, double youngs, double poisson, double mass);
-  /// Add an deformable object to the active scene. The model must have an
-  /// unstructured grid.
-  void AddDeformableObject(
-    vtkMRMLModelNode* modelNode,
-    double gravity, double stiffness, double dt, double youngs, double poisson, double mass);
-  
+    
   /// Mesh updates methods
   ///
   /// Update the given polydata points from the given object name in the
@@ -137,13 +125,11 @@ public:
   void UpdateMeshPointsFromObject(
     const std::string& objectName, vtkMRMLModelNode* mesh);
 
-  //Add a controller to an object in active scene
-  void AttachTransformController(const std::string& objectName, vtkMRMLLinearTransformNode* transform);
 
   //Add a controller to an object in given scene
   void AttachTransformController(const std::string& sceneName, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
 
-  //Update the associated controller from transfom
+  //Update the associated controller from transfom in the active scene
   void UpdateControllerFromTransform(vtkMRMLLinearTransformNode* transform);
 
   

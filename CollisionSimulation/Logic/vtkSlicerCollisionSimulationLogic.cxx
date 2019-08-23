@@ -144,18 +144,6 @@ void vtkSlicerCollisionSimulationLogic
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
-  vtkMRMLModelNode* modelNode,
-  double dt)
-{
-  this->AddImmovableObject(
-    this->GetSDK()->getActiveScene(),
-    modelNode,
-    dt
-  );
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   const std::string& sceneName,
   vtkMRMLModelNode* modelNode,
   double dt)
@@ -256,16 +244,6 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
   this->m_Solvers[modelNode->GetName()] = pbdSolverfloor;
 }
 
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
-  const std::string& obj1,
-  const std::string& obj2)
-{
-  this->AddCollisionInteraction(
-    this->GetSDK()->getActiveScene(), obj1, obj2);
-}
-
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
   const std::string& sceneName,
@@ -307,23 +285,6 @@ void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
     CD->getCollisionData(), pbdObj1, pbdObj2, solver); //fix this!!!!
   scene->getCollisionGraph()->addInteractionPair(pbdObj1, pbdObj2, CD, CH, nullptr);
 
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
-  vtkMRMLModelNode* modelNode,
-  double gravity, double stiffness, double dt, double youngs, double poisson, double mass)
-{
-  this->AddDeformableObject(
-    this->GetSDK()->getActiveScene(),
-    modelNode,
-    gravity,
-    stiffness,
-    dt,
-    youngs,
-    poisson,
-    mass
-  );
 }
 
 //----------------------------------------------------------------------------
@@ -499,20 +460,6 @@ void vtkSlicerCollisionSimulationLogic
   }
   mesh->SetPoints(dataPoints);
   mesh->Modified();
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string & objectName, vtkMRMLLinearTransformNode * transform)
-{
-  auto scene = this->SDK->getActiveScene();
-  if (!scene)
-  {
-    std::cout << "No scene" << std::endl;
-
-    return;
-  }
-
-  this->AttachTransformController(scene->getName(), objectName, transform);
 }
 
 //----------------------------------------------------------------------------
