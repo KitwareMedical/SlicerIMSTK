@@ -30,27 +30,16 @@
 #include <vtkMRMLModelNode.h>
 #include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLTransformDisplayNode.h>
+#include <vtkMRMLScene.h>
 
 // VTK includes
 #include <vtkUnstructuredGrid.h>
 
 // iMSTK includes
-#include <imstkDeformableObject.h>
-#include <imstkMeshIO.h>
-#include <imstkOneToOneMap.h>
-#include <imstkPbdModel.h>
-#include <imstkPbdObject.h>
-#include <imstkPbdSolver.h>
-#include <imstkScene.h>
-#include <imstkSimulationManager.h>
-#include <imstkSurfaceMesh.h>
-#include <imstkTetrahedralMesh.h>
-#include <vtkMRMLScene.h>
+#include <imstkSimulationManager.h>  //We want to get rid of even this eventually
 
 // Qt includes
 #include <QDebug>
-#include <QString>
-#include <QTemporaryFile>
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -77,16 +66,7 @@ public:
   vtkMRMLScene* scene;
 
   std::string InputMeshNodeName;
-  int index;
-
-  // \todo Expose these ?
-  const double scalingFactor = 1.;
-  const double geoScalingFactor = 1.;
-  const double solverTolerance = 1.0e-6;
-  const double forceScalingFactor = 2.2 * 1.0e-1;
-  const double timeStep = 0.04;
-  const double materialPointSize = 4.0;
-  const double materialLineWidth = 2.0;
+  int index;  
 };
 
 //-----------------------------------------------------------------------------
@@ -146,19 +126,13 @@ void qSlicerCollisionSimulationModuleWidgetPrivate::setupSimulation()
   auto scene = this->SDK()->getScene(sceneName);
 
   // Build mesh geometry
-  vtkSmartPointer<vtkMRMLCommandLineModuleNode> meshParameters =
-    vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
-      q->simulationLogic()->DefaultDeformableObjectParameterNode());
   q->simulationLogic()->AddDeformableObject(
     sceneName,
     this->InputMeshNode, this->Gravity->value(), this->Stiffness->value(), this->Dt->value(),
-    this->Youngs->value(), this->Poisson->value());
+    this->Youngs->value(), this->Poisson->value(), this->Mass->value());
   this->InputMeshNodeName = this->InputMeshNode->GetName();
 
   // Build floor geometry
-  vtkSmartPointer<vtkMRMLCommandLineModuleNode> floorParameters =
-    vtkSmartPointer<vtkMRMLCommandLineModuleNode>::Take(
-      q->simulationLogic()->DefaultImmovableObjectParameterNode());
   q->simulationLogic()->AddImmovableObject(
     sceneName,
     this->FloorMeshNode,
@@ -426,6 +400,6 @@ void qSlicerCollisionSimulationModuleWidget::updateFromSimulation()
   Q_ASSERT(d->OutputMeshNode && d->OutputMeshNode->GetUnstructuredGrid());
   this->simulationLogic()->UpdateMeshPointsFromObject(
     d->InputMeshNodeName, d->OutputMeshNode);
-  this->simulationLogic()->UpdateControllerFromTransform(d->FloorTransformNode);
+  this->simulationLogic()->UpdateAssociatedController(d->FloorTransformNode);
 }
 

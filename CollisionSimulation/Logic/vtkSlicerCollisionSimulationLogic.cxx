@@ -143,60 +143,16 @@ void vtkSlicerCollisionSimulationLogic
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
-  const std::string& name,
-  const std::string& obj1,
-  const std::string& obj2)
-{
-  this->AddCollisionInteraction(
-    this->GetSDK()->getScene(name), obj1, obj2);
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
-  const std::string& obj1,
-  const std::string& obj2)
-{
-  this->AddCollisionInteraction(
-    this->GetSDK()->getActiveScene(), obj1, obj2);
-}
-
-//----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
-  const std::string& name,
+  const std::string& sceneName,
   vtkMRMLModelNode* modelNode,
   double dt)
 {
   this->AddImmovableObject(
-    this->GetSDK()->getScene(name),
+    this->GetSDK()->getScene(sceneName),
     modelNode,
     dt
   );
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
-  vtkMRMLModelNode* modelNode,
-  double dt)
-{
-  this->AddImmovableObject(
-    this->GetSDK()->getActiveScene(),
-    modelNode,
-    dt
-  );
-}
-
-//----------------------------------------------------------------------------
-vtkMRMLCommandLineModuleNode* vtkSlicerCollisionSimulationLogic
-::DefaultImmovableObjectParameterNode()
-{
-  vtkMRMLCommandLineModuleNode* parameterNode =
-    vtkMRMLCommandLineModuleNode::New();
-  parameterNode->SetParameterAsDouble("Number of constraints", 0);
-  parameterNode->SetParameterAsDouble("Mass", 0.0);
-  parameterNode->SetParameterAsDouble("Proximity", 0.1);
-  parameterNode->SetParameterAsDouble("Contact stiffness", 1.0);
-  return parameterNode;
 }
 
 //----------------------------------------------------------------------------
@@ -290,6 +246,16 @@ void vtkSlicerCollisionSimulationLogic::AddImmovableObject(
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
+  const std::string& sceneName,
+  const std::string& obj1,
+  const std::string& obj2)
+{
+  this->AddCollisionInteraction(
+    this->GetSDK()->getScene(sceneName), obj1, obj2);
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
   std::shared_ptr<imstk::Scene> scene,
   const std::string& obj1,
   const std::string& obj2)
@@ -323,60 +289,27 @@ void vtkSlicerCollisionSimulationLogic::AddCollisionInteraction(
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
-  const std::string& name,
+  const std::string& sceneName,
   vtkMRMLModelNode* modelNode,
-  double gravity, double stiffness, double dt, double youngs, double poisson)
+  double gravity, double stiffness, double dt, double youngs, double poisson, double mass)
 {
   this->AddDeformableObject(
-    this->GetSDK()->getScene(name),
+    this->GetSDK()->getScene(sceneName),
     modelNode,
     gravity,
     stiffness,
     dt,
     youngs,
-    poisson
+    poisson,
+    mass
   );
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
-  vtkMRMLModelNode* modelNode,
-  double gravity, double stiffness, double dt, double youngs, double poisson)
-{
-  this->AddDeformableObject(
-    this->GetSDK()->getActiveScene(),
-    modelNode,
-    gravity,
-    stiffness,
-    dt,
-    youngs,
-    poisson
-  );
-}
-
-//----------------------------------------------------------------------------
-vtkMRMLCommandLineModuleNode* vtkSlicerCollisionSimulationLogic
-::DefaultDeformableObjectParameterNode()
-{
-  vtkMRMLCommandLineModuleNode* parameterNode =
-    vtkMRMLCommandLineModuleNode::New();
-  parameterNode->SetParameterAsDouble("Number of constraints", 1);
-  parameterNode->SetParameterAsString("Constraint configuration", "FEM NeoHookean 1.0 0.3");
-  parameterNode->SetParameterAsDouble("Mass", 1.0);
-  parameterNode->SetParameterAsString("Gravity", "0 0 -9.8");
-  parameterNode->SetParameterAsDouble("Time step", 0.001);
-  parameterNode->SetParameterAsString("Fixed point", "");
-  parameterNode->SetParameterAsDouble("Number of iteration in constraint solver", 2);
-  parameterNode->SetParameterAsDouble("Proximity", 0.1);
-  parameterNode->SetParameterAsDouble("Contact stiffness", 0.01);
-  return parameterNode;
 }
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   std::shared_ptr<imstk::Scene> scene,
   vtkMRMLModelNode* modelNode,
-  double gravity, double stiffness, double dt, double youngs, double poisson)
+  double gravity, double stiffness, double dt, double youngs, double poisson, double mass)
 {
   if (!scene
     || !modelNode)
@@ -445,8 +378,8 @@ void vtkSlicerCollisionSimulationLogic::AddDeformableObject(
   pbdParams->enableFEMConstraint(imstk::PbdConstraint::Type::FEMTet, imstk::PbdFEMConstraint::MaterialType::NeoHookean);
 
   // Other parameters
-  pbdParams->m_uniformMassValue = 1.0;
-  pbdParams->m_gravity = imstk::Vec3d(0, 0, -50*gravity);
+  pbdParams->m_uniformMassValue = mass;
+  pbdParams->m_gravity = imstk::Vec3d(0, 0, -1000*gravity);
   pbdParams->m_dt = dt;
   pbdParams->m_maxIter = 2;
   pbdParams->m_proximity = 0.1;
@@ -479,94 +412,6 @@ void vtkSlicerCollisionSimulationLogic
   this->UpdateMeshPointsFromObject(objectName, mesh);
   modelNode->SetAndObserveMesh(mesh);
   modelNode->EndModify(wasModifying);
-}
-
-void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string & objectName, vtkMRMLLinearTransformNode * transform)
-{
-  auto scene = this->SDK->getActiveScene();
-  if (!scene)
-  {
-    std::cout << "No scene" << std::endl;
-
-    return;
-  }
-
-  this->AttachTransformController(scene->getName(), objectName, transform);
-}
-
-void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& name, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
-{
-  if (!transform || objectName.empty())
-  {
-    std::cout << "No transform" << std::endl;
-
-    return;
-  }
-
-  auto scene = this->SDK->getScene(name);
-  if (!scene)
-  {
-    std::cout << "No scene" << std::endl;
-
-    return;
-  }
-
-  auto object =
-    std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));
-
-  auto client_name = objectName + "_Controller";
-
-  auto client = std::make_shared<imstk::DummyClient>(client_name);
-
-  auto trackCtrl = std::make_shared<imstk::DeviceTracker>(client);
-  //trackCtrl->setTranslationScaling(0.1);
-  auto controller = std::make_shared<imstk::SceneObjectController>(object, trackCtrl);
-  scene->addObjectController(controller);
-  std::cout << "Controller added" << std::endl;
-  this->m_TransformClients[transform->GetName()] = client;
-}
-
-void vtkSlicerCollisionSimulationLogic::UpdateControllerFromTransform(vtkMRMLLinearTransformNode * transform)
-{
-  if (!transform)
-  {
-    return;
-    std::cout << "No transform" << std::endl;
-  }
-  
-  auto scene = this->SDK->getActiveScene();
-  if (!scene)
-  {
-    return;
-    std::cout << "No scene" << std::endl;
-
-  }
-
-  auto client =
-    this->m_TransformClients[transform->GetName()];
-
-  //client->s
-
-  if (!client)
-  {
-    return;
-    std::cout << "No client" << std::endl;
-
-  }
-
-  vtkNew<vtkMatrix4x4> matrix;
-  transform->GetMatrixTransformToParent(matrix.GetPointer());
-  imstk::Vec3d p;
-  p[0] = matrix->GetElement(0, 3);
-  p[1] = matrix->GetElement(1, 3);
-  p[2] = matrix->GetElement(2, 3);
-  client->setPosition(p);
-
-  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
-  imstk::Quatd qor(orient);
-  client->setOrientation(qor);
-
-
 }
 
 //----------------------------------------------------------------------------
@@ -616,6 +461,129 @@ void vtkSlicerCollisionSimulationLogic
   mesh->SetPoints(dataPoints);
   mesh->Modified();
 }
+
+//----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic::AttachTransformController(const std::string& sceneName, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform || objectName.empty())
+  {
+    std::cout << "No transform" << std::endl;
+
+    return;
+  }
+
+  auto scene = this->SDK->getScene(sceneName);
+  if (!scene)
+  {
+    std::cout << "No scene" << std::endl;
+
+    return;
+  }
+
+  auto object =
+    std::dynamic_pointer_cast<imstk::PbdObject>(scene->getSceneObject(objectName));
+
+  auto client_name = objectName + "_Controller";
+
+  auto client = std::make_shared<imstk::DummyClient>(client_name);
+
+  auto trackCtrl = std::make_shared<imstk::DeviceTracker>(client);
+  auto controller = std::make_shared<imstk::SceneObjectController>(object, trackCtrl);
+  scene->addObjectController(controller);
+  std::cout << "Controller added" << std::endl;
+
+  //Add references to both object and transform - allow easer retrieval
+  this->m_Controllers[transform->GetName()] = client;
+  this->m_Controllers[objectName] = client;
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerCollisionSimulationLogic::UpdateAssociatedController(vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform)
+  {
+    return;
+    std::cout << "No transform" << std::endl;
+  }
+  
+  auto scene = this->SDK->getActiveScene();
+  if (!scene)
+  {
+    return;
+    std::cout << "No scene" << std::endl;
+
+  }
+
+  auto client =
+    this->m_Controllers[transform->GetName()];
+
+  //client->s
+
+  if (!client)
+  {
+    return;
+    std::cout << "No client" << std::endl;
+
+  }
+
+  vtkNew<vtkMatrix4x4> matrix;
+  transform->GetMatrixTransformToParent(matrix.GetPointer());
+  imstk::Vec3d p;
+  p[0] = matrix->GetElement(0, 3);
+  p[1] = matrix->GetElement(1, 3);
+  p[2] = matrix->GetElement(2, 3);
+  client->setPosition(p);
+
+  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
+  imstk::Quatd qor(orient);
+  client->setOrientation(qor);
+
+
+}
+
+void vtkSlicerCollisionSimulationLogic::UpdateControllerForObject(const std::string & sceneName, const std::string & objectName, vtkMRMLLinearTransformNode * transform)
+{
+  if (!transform)
+  {
+    return;
+    std::cout << "No transform" << std::endl;
+  }
+
+  auto scene = this->SDK->getScene(sceneName);
+  if (!scene)
+  {
+    return;
+    std::cout << "No scene" << std::endl;
+
+  }
+
+  //look up by object name
+  auto client =
+    this->m_Controllers[objectName];
+
+  //client->s
+
+  if (!client)
+  {
+    return;
+    std::cout << "No client" << std::endl;
+
+  }
+
+  vtkNew<vtkMatrix4x4> matrix;
+  transform->GetMatrixTransformToParent(matrix.GetPointer());
+  imstk::Vec3d p;
+  p[0] = matrix->GetElement(0, 3);
+  p[1] = matrix->GetElement(1, 3);
+  p[2] = matrix->GetElement(2, 3);
+  client->setPosition(p);
+
+  Eigen::Matrix3d orient = (Eigen::Affine3d(Eigen::Matrix4d(matrix->GetData()))).rotation();
+  imstk::Quatd qor(orient);
+  client->setOrientation(qor);
+}
+
+
 
 //----------------------------------------------------------------------------
 void vtkSlicerCollisionSimulationLogic::PrintSelf(ostream& os, vtkIndent indent)

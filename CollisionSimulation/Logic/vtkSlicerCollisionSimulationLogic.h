@@ -83,21 +83,19 @@ public:
   /// Create a scene with the given name. It will be added to the SDK.
   /// By default, it will be made the active scene.
   /// \sa GetSDK
-  void CreateScene(const std::string& name, bool makeActive = true);
+  void CreateScene(const std::string& sceneName, bool makeActive = true);
 
   /// imstk::Scene
   ///
   /// Set the active scene on the SDK.
-  void SetActiveScene(const std::string& name, bool unloadPrevious = true);
+  void SetActiveScene(const std::string& sceneName, bool unloadPrevious = true);
 
   /// imstk collision
   ///
   /// Add collision interaction between the two objects.
   /// They must be in the scene.
   void AddCollisionInteraction(
-    const std::string& obj1, const std::string& obj2);
-  void AddCollisionInteraction(
-    const std::string& name,
+    const std::string& sceneName,
     const std::string& obj1, const std::string& obj2);
 
   /// imstk immovable object
@@ -105,39 +103,19 @@ public:
   /// Add an immovable object to the given scene. The model must have an
   /// unstructured grid.
   void AddImmovableObject(
-    const std::string& name,
+    const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
-    double dt);
-  /// Add an immovable object to the active scene. The model must have an
-  /// unstructured grid.
-  void AddImmovableObject(
-    vtkMRMLModelNode* modelNode,
-    double dt);
-
-  /// Create a parameter node with default values for immovable objects.
-  /// The returned node is NOT added to the scene.
-  /// You are responsible for deleting the returned node.
-  vtkMRMLCommandLineModuleNode* DefaultImmovableObjectParameterNode();
-
+    double dt = 0.001);
+  
   /// imstk deformable object
   ///
   /// Add a deformable object to the given scene. The model must have an
   /// unstructured grid.
   void AddDeformableObject(
-    const std::string& name,
+    const std::string& sceneName,
     vtkMRMLModelNode* modelNode,
-    double gravity, double stiffness, double dt, double youngs, double poisson);
-  /// Add an deformable object to the active scene. The model must have an
-  /// unstructured grid.
-  void AddDeformableObject(
-    vtkMRMLModelNode* modelNode,
-    double gravity, double stiffness, double dt, double youngs, double poisson);
-
-  /// Create a parameter node with default values for deformable objects.
-  /// The returned node is NOT added to the scene.
-  /// You are responsible for deleting the returned node.
-  vtkMRMLCommandLineModuleNode* DefaultDeformableObjectParameterNode();
-
+    double gravity = 9.8, double stiffness = 1.0, double dt = 0.001, double youngs = 0.5, double poisson = 0.3, double mass = 1.0);
+    
   /// Mesh updates methods
   ///
   /// Update the given polydata points from the given object name in the
@@ -147,14 +125,15 @@ public:
   void UpdateMeshPointsFromObject(
     const std::string& objectName, vtkMRMLModelNode* mesh);
 
-  //Add a controller to an object
-  void AttachTransformController(const std::string& objectName, vtkMRMLLinearTransformNode* transform);
 
-  //Add a controller to an object
-  void AttachTransformController(const std::string& name, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
+  //Add a controller to an object in given scene, associated to a transform node
+  void AttachTransformController(const std::string& sceneName, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
 
-  void UpdateControllerFromTransform(vtkMRMLLinearTransformNode* transform);
+  //Update the associated controller for transfom in the active scene, look up by transform - must match initial transform
+  void UpdateAssociatedController(vtkMRMLLinearTransformNode* transform);
 
+  //Update the associated controller for transfom in the active scene, look up by object - does not need to match initial transform
+  void UpdateControllerForObject(const std::string& sceneName, const std::string& objectName, vtkMRMLLinearTransformNode* transform);
   
 
 protected:
@@ -172,17 +151,24 @@ protected:
   void AddDeformableObject(
     std::shared_ptr<imstk::Scene> scene,
     vtkMRMLModelNode* modelNode,
-    double gravity, double stiffness, double dt, double youngs, double poisson);
+    double gravity, double stiffness, double dt, double youngs, double poisson, double mass);
 
 private:
   vtkSlicerCollisionSimulationLogic(const vtkSlicerCollisionSimulationLogic&); // Not implemented
   void operator=(const vtkSlicerCollisionSimulationLogic&); // Not implemented
 
   std::shared_ptr<imstk::SimulationManager> SDK;
+
+  /* These maps are used to look up data objects that cannot be easily retrieved from the scene
+      Splitting the setup into multiple functions has made this useful.  See the collision interaction
+      setup for an example of why this is needed*/
+
+  //Lookup string is the name of the associated model node
   std::map < std::string, std::shared_ptr<imstk::PbdObject>> m_Objects;
   std::map < std::string, std::shared_ptr<imstk::SurfaceMesh>> m_Meshes;
   std::map < std::string, std::shared_ptr<imstk::PbdSolver>> m_Solvers;
-  std::map < std::string, std::shared_ptr<imstk::DummyClient>> m_TransformClients;
+  std::map < std::string, std::shared_ptr<imstk::DummyClient>> m_Controllers;
+
 
 
 };
