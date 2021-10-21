@@ -1,3 +1,39 @@
+#------------------------------------------------------------------------------
+# Include remote modules
+#------------------------------------------------------------------------------
+
+include(FetchContent)
+
+# VTKExternalModule
+set(proj VTKExternalModule)
+set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
+FetchContent_Populate(${proj}
+  QUIET
+  GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/KitwareMedical/VTKExternalModule
+  GIT_TAG        3bae71e5eba073e589810a8bef947d65c90a2174
+  SOURCE_DIR ${EP_SOURCE_DIR}
+  )
+message(STATUS "Remote - ${proj} [OK]")
+
+set(VTKExternalModule_SOURCE_DIR ${EP_SOURCE_DIR})
+
+# iMSTK
+set(proj "iMSTK")
+set(${proj}_SOURCE_DIR "${CMAKE_BINARY_DIR}/${proj}")
+FetchContent_Populate(${proj}
+  SOURCE_DIR     ${${proj}_SOURCE_DIR}
+  GIT_REPOSITORY git://github.com/jcfr/iMSTK.git
+  GIT_TAG        0ffa63e9b6e44f986b385bda4aaec4a17956e842  # update-build-system-to-streamline-application-integration
+  GIT_PROGRESS   1
+  QUIET
+  )
+message(STATUS "Remote - ${proj} [OK]")
+
+set(CMAKE_MODULE_PATH
+  ${iMSTK_SOURCE_DIR}/CMake
+  ${iMSTK_SOURCE_DIR}/CMake/Utilities
+  ${CMAKE_MODULE_PATH}
+  )
 
 #-----------------------------------------------------------------------------
 # External project common settings
@@ -46,9 +82,6 @@ ExternalProject_Add(${proj}
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-    # Packaging
-    -DMIDAS_PACKAGE_EMAIL:STRING=${MIDAS_PACKAGE_EMAIL}
-    -DMIDAS_PACKAGE_API_KEY:STRING=${MIDAS_PACKAGE_API_KEY}
     # Superbuild
     -D${EXTENSION_NAME}_SUPERBUILD:BOOL=OFF
     -DEXTENSION_SUPERBUILD_BINARY_DIR:PATH=${${EXTENSION_NAME}_BINARY_DIR}
