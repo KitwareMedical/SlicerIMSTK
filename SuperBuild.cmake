@@ -2,38 +2,8 @@
 # Include remote modules
 #------------------------------------------------------------------------------
 
-include(FetchContent)
-
-# VTKExternalModule
-set(proj VTKExternalModule)
-set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
-FetchContent_Populate(${proj}
-  QUIET
-  GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/KitwareMedical/VTKExternalModule
-  GIT_TAG        3bae71e5eba073e589810a8bef947d65c90a2174
-  SOURCE_DIR ${EP_SOURCE_DIR}
-  )
-message(STATUS "Remote - ${proj} [OK]")
-
-set(VTKExternalModule_SOURCE_DIR ${EP_SOURCE_DIR})
-
-# iMSTK
-set(proj "iMSTK")
-set(${proj}_SOURCE_DIR "${CMAKE_BINARY_DIR}/${proj}")
-FetchContent_Populate(${proj}
-  SOURCE_DIR     ${${proj}_SOURCE_DIR}
-  GIT_REPOSITORY git://github.com/jcfr/iMSTK.git
-  GIT_TAG        0ffa63e9b6e44f986b385bda4aaec4a17956e842  # update-build-system-to-streamline-application-integration
-  GIT_PROGRESS   1
-  QUIET
-  )
-message(STATUS "Remote - ${proj} [OK]")
-
-set(CMAKE_MODULE_PATH
-  ${iMSTK_SOURCE_DIR}/CMake
-  ${iMSTK_SOURCE_DIR}/CMake/Utilities
-  ${CMAKE_MODULE_PATH}
-  )
+include(${SlicerIMSTK_SOURCE_DIR}/FetchVTKExternalModule.cmake)
+include(${SlicerIMSTK_SOURCE_DIR}/FetchIMSTK.cmake)
 
 #-----------------------------------------------------------------------------
 # External project common settings
