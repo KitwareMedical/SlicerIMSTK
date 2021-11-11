@@ -1,9 +1,3 @@
-#------------------------------------------------------------------------------
-# Include remote modules
-#------------------------------------------------------------------------------
-
-include(${SlicerIMSTK_SOURCE_DIR}/FetchVTKExternalModule.cmake)
-include(${SlicerIMSTK_SOURCE_DIR}/FetchIMSTK.cmake)
 
 #-----------------------------------------------------------------------------
 # External project common settings
