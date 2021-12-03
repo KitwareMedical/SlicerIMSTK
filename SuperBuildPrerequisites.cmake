@@ -16,6 +16,7 @@ if(DEFINED Slicer_SOURCE_DIR)
   # attempt to build projects like vtkRenderingExternal or vtkRenderingOpenVR.
   set(SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
     Assimp
+    Eigen3
     g3log
     iMSTK
     LibNiFalcon

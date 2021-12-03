@@ -1,20 +1,9 @@
 
-set(proj VegaFEM)
+set(proj Eigen3)
 
 set(${proj}_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
 set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 set(${proj}_INSTALL_DIR ${CMAKE_BINARY_DIR}/${proj}-install)
-
-if(WIN32)
-  mark_as_superbuild(
-    VARS
-      PTHREAD_INCLUDE_DIR:PATH
-      PTHREAD_RELEASE_LIBRARY:FILEPATH
-      PTHREAD_DEBUG_LIBRARY:FILEPATH
-    PROJECTS
-      ${proj}
-    )
-endif()
 
 include(${iMSTK_SOURCE_DIR}/CMake/External/External_${proj}.cmake)
 if(NOT SB_SECOND_PASS)
@@ -29,4 +18,3 @@ mark_as_superbuild(
   PROJECTS
     iMSTK
   )
-

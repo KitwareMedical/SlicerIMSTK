@@ -2,6 +2,7 @@ set(proj iMSTK)
 
 set(_imstk_depends
   Assimp
+  Eigen3
   g3log
   LibNiFalcon
   Libusb
@@ -64,9 +65,6 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(EP_SOURCE_DIR ${${proj}_SOURCE_DIR})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
-  set(tbb_ROOT_DIR ${TBB_DIR}/..)
-  set(tbb_LIB_DIR "lib/intel64/gcc4.8")
-
   set(EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS)
   foreach(_name IN ITEMS
     vtkRenderingExternal
@@ -104,10 +102,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DiMSTK_BUILD_TESTING:BOOL=OFF
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
+      -DiMSTK_AUDIO_ENABLED:BOOL=OFF
       # Dependencies
+      -DTBB_DIR:PATH=${TBB_DIR}
       -DVTK_DIR:PATH=${VTK_DIR}
-      -Dtbb_ROOT_DIR:PATH=${tbb_ROOT_DIR}
-      -Dtbb_LIB_DIR:STRING=${tbb_LIB_DIR}
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
     INSTALL_COMMAND ""
     DEPENDS

@@ -2,7 +2,7 @@
 set(proj Libusb)
 
 set(${proj}_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
-set(${proj}_INSTALL_DIR ${${proj}_SOURCE_DIR})
+set(${proj}_INSTALL_DIR ${CMAKE_BINARY_DIR}/${proj}-install)
 
 include(${iMSTK_SOURCE_DIR}/CMake/External/External_${proj}.cmake)
 if(NOT SB_SECOND_PASS)
