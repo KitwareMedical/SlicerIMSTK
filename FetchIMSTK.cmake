@@ -6,7 +6,7 @@ set(EP_SOURCE_DIR "${CMAKE_BINARY_DIR}/${proj}")
 FetchContent_Populate(${proj}
   SOURCE_DIR     ${EP_SOURCE_DIR}
   GIT_REPOSITORY git://github.com/jcfr/iMSTK.git
-  GIT_TAG        75c486e38cf6c35afaac02d5277152a9ef6fb0f9  # update-build-system-to-streamline-application-integration
+  GIT_TAG        4bdcf5e96c0ac97340ae14c0b0fd0ca971100355  # update-build-system-to-streamline-application-integration
   QUIET
   )
 message(STATUS "Remote - ${proj} [OK]")

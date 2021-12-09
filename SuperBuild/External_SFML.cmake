@@ -1,5 +1,5 @@
 
-set(proj VegaFEM)
+set(proj SFML)
 
 set(${proj}_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
 set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
@@ -10,12 +10,16 @@ if(NOT SB_SECOND_PASS)
   return()
 endif()
 
-ExternalProject_Message(${proj} "${proj}_DIR:${${proj}_DIR}")
+set(${proj}_ROOT_DIR ${${proj}_INSTALL_DIR})
+set(${proj}_LIB_DIR "lib")
+
+ExternalProject_Message(${proj} "${proj}_ROOT_DIR:${${proj}_ROOT_DIR}")
+ExternalProject_Message(${proj} "${proj}_LIB_DIR:${${proj}_LIB_DIR}")
 
 mark_as_superbuild(
   VARS
-    ${proj}_DIR:PATH
+    ${proj}_ROOT_DIR:PATH
+    ${proj}_LIB_DIR:STRING
   PROJECTS
     iMSTK
   )
-
