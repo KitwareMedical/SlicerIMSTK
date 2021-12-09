@@ -1,14 +1,8 @@
 set(proj iMSTK)
 
-set(_imstk_depends
-  Assimp
-  Eigen3
-  g3log
-  LibNiFalcon
-  Libusb
-  OpenVR
-  VegaFEM
-  )
+if(NOT DEFINED iMSTK_EXTERNAL_PROJECT_DEPENDENCIES)
+  message(FATAL_ERROR "Variable iMSTK_EXTERNAL_PROJECT_DEPENDENCIES is not set: Consider including SuperBuildPrerequisites.cmake in custom application CMakeLists.txt")
+endif()
 
 if(NOT SB_SECOND_PASS)
   mark_as_superbuild(
@@ -19,13 +13,13 @@ if(NOT SB_SECOND_PASS)
       CMAKE_CXX_STANDARD_REQUIRED:BOOL
       CMAKE_CXX_EXTENSIONS:BOOL
     PROJECTS
-      ${_imstk_depends}
+      ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
   )
 endif()
 
 # Set dependency list
 set(${proj}_DEPENDS
-  ${_imstk_depends}
+  ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
   )
 
 if(DEFINED Slicer_SOURCE_DIR)
