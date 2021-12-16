@@ -9,9 +9,9 @@ if(DEFINED slicersources_SOURCE_DIR AND NOT DEFINED Slicer_SOURCE_DIR)
   set(Slicer_SOURCE_DIR ${slicersources_SOURCE_DIR})
 endif()
 
-# List of iMSTK dependencies used:
-# * below to set SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
-# * in External_iMSTK.cmake
+# List of <external-project> dependencies used
+# (1) to update "<extension-name>_EXTERNAL_PROJECT_DEPENDENCIES" below
+# (2) to setup associated "External_<external-project>.cmake"
 set(iMSTK_EXTERNAL_PROJECT_DEPENDENCIES
   Assimp
   Eigen3
@@ -25,8 +25,9 @@ set(iMSTK_EXTERNAL_PROJECT_DEPENDENCIES
 if(DEFINED Slicer_SOURCE_DIR)
   # Extension is bundled in a custom application
 
-  # Explicit list of dependencies to ensure the custom application does NOT
-  # attempt to build projects like vtkRenderingExternal or vtkRenderingOpenVR.
+  # Explicit list of dependencies ensuring the custom application bundling this
+  # extension does NOT attempt to build external projects associated with VTK modules
+  # enabled below.
   set(SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
     ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
     iMSTK
