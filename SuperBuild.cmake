@@ -18,9 +18,12 @@ endforeach()
 set(proj ${SUPERBUILD_TOPLEVEL_PROJECT})
 
 # Project dependencies
+if(NOT DEFINED ${EXTENSION_NAME}_EXTERNAL_PROJECT_DEPENDENCIES)
+  message(FATAL_ERROR "${EXTENSION_NAME}_EXTERNAL_PROJECT_DEPENDENCIES [${${EXTENSION_NAME}_EXTERNAL_PROJECT_DEPENDENCIES}] variable is not set.")
+endif()
 set(${proj}_DEPENDS
-   iMSTK
-   )
+  ${${EXTENSION_NAME}_EXTERNAL_PROJECT_DEPENDENCIES}
+  )
 
 ExternalProject_Include_Dependencies(${proj}
   PROJECT_VAR proj

@@ -1,8 +1,15 @@
 set(proj iMSTK)
 
-if(NOT DEFINED iMSTK_EXTERNAL_PROJECT_DEPENDENCIES)
-  message(FATAL_ERROR "Variable iMSTK_EXTERNAL_PROJECT_DEPENDENCIES is not set: Consider including SuperBuildPrerequisites.cmake in custom application CMakeLists.txt")
-endif()
+# Set dependency list
+set(${proj}_DEPENDS
+  Assimp
+  Eigen3
+  g3log
+  LibNiFalcon
+  Libusb
+  OpenVR
+  VegaFEM
+  )
 
 if(NOT SB_SECOND_PASS)
   mark_as_superbuild(
@@ -13,14 +20,9 @@ if(NOT SB_SECOND_PASS)
       CMAKE_CXX_STANDARD_REQUIRED:BOOL
       CMAKE_CXX_EXTENSIONS:BOOL
     PROJECTS
-      ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
+      ${${proj}_DEPENDS}
   )
 endif()
-
-# Set dependency list
-set(${proj}_DEPENDS
-  ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
-  )
 
 set(_vtk_modules_depends
   vtkRenderingExternal
