@@ -22,6 +22,10 @@ set(${proj}_DEPENDS
   ${iMSTK_EXTERNAL_PROJECT_DEPENDENCIES}
   )
 
+set(_vtk_modules_depends
+  vtkRenderingExternal
+  vtkRenderingOpenVR
+  )
 if(DEFINED Slicer_SOURCE_DIR)
   # Extension is bundled in a custom application
   list(APPEND ${proj}_DEPENDS
@@ -32,8 +36,7 @@ else()
   # Extension is build standalone against Slicer itself built
   # against VTK without the relevant modules enabled.
   list(APPEND ${proj}_DEPENDS
-    vtkRenderingExternal
-    vtkRenderingOpenVR
+    ${_vtk_modules_depends}
     )
 endif()
 
@@ -60,10 +63,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
   set(EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS)
-  foreach(_name IN ITEMS
-    vtkRenderingExternal
-    vtkRenderingOpenVR
-    )
+  foreach(_name IN LISTS _vtk_modules_depends)
     list(APPEND EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS
       -D${_name}_DIR:PATH=${${_name}_DIR}
       )
