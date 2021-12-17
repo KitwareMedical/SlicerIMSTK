@@ -38,3 +38,14 @@ mark_as_superbuild(
     iMSTK
   )
 
+# Variable used in extension CMakeLists.txt to specify install rule
+mark_as_superbuild(${proj}_DLL_NAME:STRING)
+
+#-----------------------------------------------------------------------------
+# Launcher setting specific to build tree
+
+set(${proj}_LIBRARY_PATHS_LAUNCHER_BUILD ${${proj}_INSTALL_DIR}/${${proj}_DLL_DIR})
+mark_as_superbuild(
+  VARS ${proj}_LIBRARY_PATHS_LAUNCHER_BUILD
+  LABELS "LIBRARY_PATHS_LAUNCHER_BUILD"
+  )

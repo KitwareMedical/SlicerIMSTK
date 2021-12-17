@@ -57,6 +57,38 @@ if(SlicerIMSTK_BUILD_SimulationData)
 endif()
 
 #-----------------------------------------------------------------------------
+# Install FTD2XX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
+      RENAME "ftd2xx.dll"
+      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+      COMPONENT RuntimeLibraries
+      )
+  endif()
+endif()
+
+#-----------------------------------------------------------------------------
+# Install Libusb
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  install(FILES ${Libusb_LIBRARY_PATHS_LAUNCHER_BUILD}/${Libusb_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+endif()
+
+#-----------------------------------------------------------------------------
+# Install OpenVR
+install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
+  DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+  COMPONENT RuntimeLibraries
+  )
+
+#-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR};iMSTK;RuntimeLibraries;/")
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${SlicerIMSTK_BINARY_DIR}/../Assimp-build;Assimp;Unspecified;/")
