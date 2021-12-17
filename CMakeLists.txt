@@ -59,7 +59,7 @@ endif()
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR};iMSTK;RuntimeLibraries;/")
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../External/Assimp/build;Assimp;libassimp3.3.1;/")
+list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${SlicerIMSTK_BINARY_DIR}/../Assimp-build;Assimp;Unspecified;/")
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
 
 #-----------------------------------------------------------------------------
