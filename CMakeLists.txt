@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13.4)
 
 project(SlicerIMSTK)
 
@@ -26,23 +26,72 @@ find_package(Git REQUIRED)
 mark_as_superbuild(GIT_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
+set(_build_module_default ON)
+if(DEFINED Slicer_SOURCE_DIR)
+  set(_build_module_default OFF)
+endif()
+
+option(SlicerIMSTK_BUILD_CollisionSimulation "Enable the building of CollisionSimulation module." ${_build_module_default})
+mark_as_superbuild(SlicerIMSTK_BUILD_CollisionSimulation)
+
+option(SlicerIMSTK_BUILD_SimulationData "Enable the building of SimulationData module." ${_build_module_default})
+mark_as_superbuild(SlicerIMSTK_BUILD_SimulationData)
+
+#-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
 mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
 if(${EXTENSION_NAME}_SUPERBUILD)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuildPrerequisites.cmake")
   include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
   return()
 endif()
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(CollisionSimulation)
-add_subdirectory(SimulationData)
+if(SlicerIMSTK_BUILD_CollisionSimulation)
+  add_subdirectory(CollisionSimulation)
+endif()
+if(SlicerIMSTK_BUILD_SimulationData)
+  add_subdirectory(SimulationData)
+endif()
+
+#-----------------------------------------------------------------------------
+# Install FTD2XX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
+      RENAME "ftd2xx.dll"
+      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+      COMPONENT RuntimeLibraries
+      )
+  endif()
+endif()
+
+#-----------------------------------------------------------------------------
+# Install Libusb
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  install(FILES ${Libusb_LIBRARY_PATHS_LAUNCHER_BUILD}/${Libusb_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+endif()
+
+#-----------------------------------------------------------------------------
+# Install OpenVR
+install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
+  DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+  COMPONENT RuntimeLibraries
+  )
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR};iMSTK;RuntimeLibraries;/")
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../External/Assimp/build;Assimp;libassimp3.3.1;/")
+list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../Assimp-build;Assimp;libassimp3.3.1;/")
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
 
 #-----------------------------------------------------------------------------
