@@ -9,6 +9,7 @@ set(${proj}_DEPENDS
   Libusb
   OpenVR
   VegaFEM
+  OpenHaptics
   )
 
 if(NOT SB_SECOND_PASS)
@@ -99,6 +100,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
+      -DiMSTK_USE_OpenHaptics:BOOL=ON
       # Dependencies
       -DTBB_DIR:PATH=${TBB_DIR}
       -DVTK_DIR:PATH=${VTK_DIR}
