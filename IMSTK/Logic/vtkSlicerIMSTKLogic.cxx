@@ -49,6 +49,7 @@
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkPolyData.h>
+#include <vtkRenderWindow.h>
 
 // STD includes
 #include <cassert>
@@ -65,6 +66,10 @@ vtkSlicerIMSTKLogic::vtkSlicerIMSTKLogic()
 //----------------------------------------------------------------------------
 vtkSlicerIMSTKLogic::~vtkSlicerIMSTKLogic()
 {
+  for (auto const& x : this->simulations)
+  {
+    x.second->requestStatus(ModuleDriverStopped);
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -132,6 +137,7 @@ void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::strin
     // Setup a viewer to render in its own thread
     imstk::imstkNew<imstk::VTKViewer> viewer;
     viewer->setActiveScene(scene);
+    viewer->getVtkRenderWindow()->SetShowWindow(false);
 
     // Setup a scene manager to advance the scene in its own thread
     imstk::imstkNew<imstk::SceneManager> sceneManager;
@@ -204,6 +210,7 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
     // Setup a viewer to render in its own thread
     imstk::imstkNew<imstk::VTKViewer> viewer;
     viewer->setActiveScene(scene);
+    viewer->getVtkRenderWindow()->SetShowWindow(false);
 
     // Setup a scene manager to advance the scene in its own thread
     imstk::imstkNew<imstk::SceneManager> sceneManager;

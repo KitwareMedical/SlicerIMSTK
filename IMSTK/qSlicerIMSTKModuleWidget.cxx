@@ -106,6 +106,7 @@ void qSlicerIMSTKModuleWidget::onRigidBodyApplyButton()
 
   std::cout << "Clicked rigid body apply" << std::endl;
   d->RigidStopButton->setEnabled(true);
+  d->RigidBodyApplyButton->setEnabled(false);
 
   auto input = vtkMRMLModelNode::SafeDownCast(d->RigidBodyInputModelComboBox->currentNode());
   auto output = vtkMRMLModelNode::SafeDownCast(d->RigidBodyOutputModelComboBox->currentNode());
@@ -124,6 +125,7 @@ void qSlicerIMSTKModuleWidget::onHapticApplyButton()
 
   std::cout << "Clicked haptics apply" << std::endl;
   d->HapticStopButton->setEnabled(true);
+  d->HapticApplyButton->setEnabled(false);
 
   auto transform = vtkMRMLLinearTransformNode::SafeDownCast(d->HapticOutputTransformComboBox->currentNode());
   transform->CreateDefaultDisplayNodes();
