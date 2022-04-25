@@ -34,6 +34,12 @@ set(${KIT}_TARGET_LIBRARIES
   ${iMSTK_LIBRARIES}
   )
 
+set(configure_header_file vtkSlicerIMSTKLogicConfigure.h)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/${configure_header_file}.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
+  )
+
 #-----------------------------------------------------------------------------
 SlicerMacroBuildModuleLogic(
   NAME ${KIT}

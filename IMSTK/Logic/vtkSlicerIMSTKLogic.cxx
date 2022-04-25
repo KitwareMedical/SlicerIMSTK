@@ -17,6 +17,7 @@
 
 // IMSTK Logic includes
 #include "vtkSlicerIMSTKLogic.h"
+#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
@@ -114,6 +115,7 @@ void vtkSlicerIMSTKLogic
 
 void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::string deviceName, vtkMRMLLinearTransformNode* outputTransformNode)
 {
+#ifdef Slicer_iMSTK_USE_OpenHaptics
   imstk::imstkNew<imstk::Scene>               scene("SDFHaptics");
 
   {
@@ -181,7 +183,11 @@ void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::strin
     this->simulations[simName] = driver;
     driver->start();
   }
-
+#else
+  (void)simName; // unused
+  (void)deviceName; // unused
+  (void)outputTransformNode; // unused
+#endif
 }
 
 void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, vtkMRMLModelNode* inputNode, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode)
