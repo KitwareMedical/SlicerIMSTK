@@ -26,18 +26,6 @@ find_package(Git REQUIRED)
 mark_as_superbuild(GIT_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
-set(_build_module_default ON)
-if(DEFINED Slicer_SOURCE_DIR)
-  set(_build_module_default OFF)
-endif()
-
-option(SlicerIMSTK_BUILD_CollisionSimulation "Enable the building of CollisionSimulation module." ${_build_module_default})
-mark_as_superbuild(SlicerIMSTK_BUILD_CollisionSimulation)
-
-option(SlicerIMSTK_BUILD_SimulationData "Enable the building of SimulationData module." ${_build_module_default})
-mark_as_superbuild(SlicerIMSTK_BUILD_SimulationData)
-
-#-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
 mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
@@ -49,12 +37,6 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Extension modules
-if(SlicerIMSTK_BUILD_CollisionSimulation)
-  add_subdirectory(CollisionSimulation)
-endif()
-if(SlicerIMSTK_BUILD_SimulationData)
-  add_subdirectory(SimulationData)
-endif()
 
 #-----------------------------------------------------------------------------
 # Install FTD2XX
