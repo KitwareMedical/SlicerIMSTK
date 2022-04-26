@@ -11,6 +11,14 @@ set(${proj}_DEPENDS
   VegaFEM
   )
 
+set(iMSTK_USE_OpenHaptics OFF)
+if(WIN32)
+  list(APPEND ${proj}_DEPENDS
+    OpenHaptics
+    )
+  set(iMSTK_USE_OpenHaptics ON)
+endif()
+
 if(NOT SB_SECOND_PASS)
   mark_as_superbuild(
     VARS
@@ -99,6 +107,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
+      -DiMSTK_USE_OpenHaptics:BOOL=${iMSTK_USE_OpenHaptics}
       # Dependencies
       -DTBB_DIR:PATH=${TBB_DIR}
       -DVTK_DIR:PATH=${VTK_DIR}

@@ -38,6 +38,8 @@ endif()
 #-----------------------------------------------------------------------------
 # Extension modules
 
+add_subdirectory(IMSTK)
+
 #-----------------------------------------------------------------------------
 # Install FTD2XX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
