@@ -15,6 +15,28 @@ endif()
 set(SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
   iMSTK
   )
+if(DEFINED Slicer_SOURCE_DIR)
+  # Extension is bundled in a custom application
+  if(SlicerIMSTK_BUILD_ViewerVTK)
+    list(APPEND SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
+      OpenVR
+      )
+  endif()
+else()
+  # Extension is build standalone against Slicer itself built
+  # against VTK without the relevant modules enabled.
+  if(SlicerIMSTK_BUILD_ViewerVTK)
+    list(APPEND SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
+      vtkRenderingOpenVR
+      )
+  endif()
+  # Add dependency on "tbb" only if not already built-in Slicer
+  if(NOT Slicer_USE_TBB)
+    list(APPEND EXTERNAL_PROJECT_ADDITIONAL_DIRS
+      ${CMAKE_CURRENT_BINARY_DIR}/SuperBuild
+      )
+  endif()
+endif()
 message(STATUS "SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES}")
 
 # Download iMSTK sources so that External_*.cmake project provided by SlicerIMSTK
@@ -30,24 +52,37 @@ set(CMAKE_MODULE_PATH
   )
 
 if(NOT DEFINED Slicer_SOURCE_DIR)
-  # Extension is built standalone, VTKExternalModule is required
-  # to configure external projects associated with VTK modules.
+  # Extension is built standalone
+
+  # VTKExternalModule is required to configure these external projects:
+  # - vtkRenderingVR
+  # - vtkRenderingOpenVR
+
   include(${SlicerIMSTK_SOURCE_DIR}/FetchVTKExternalModule.cmake)
 
 else()
   # Extension is bundled in a custom application
 
-  # Additional external project dependencies
-  ExternalProject_Add_Dependencies(VTK
-    DEPENDS
-      OpenVR
-    )
+  if(SlicerIMSTK_BUILD_ViewerVTK)
+    # Additional external project dependencies
+    ExternalProject_Add_Dependencies(VTK
+      DEPENDS
+        OpenVR
+      )
+  endif()
 
   # Additional external project options
-  set(VTK_MODULE_ENABLE_VTK_RenderingExternal YES)
+  if(SlicerIMSTK_BUILD_ViewerVTK)
+    set(VTK_MODULE_ENABLE_VTK_RenderingExternal YES)
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR YES)
+  else()
+    set(VTK_MODULE_ENABLE_VTK_RenderingExternal NO)
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR NO)
+  endif()
   mark_as_superbuild(
     VARS
       VTK_MODULE_ENABLE_VTK_RenderingExternal:STRING
+      VTK_MODULE_ENABLE_VTK_RenderingOpenVR:STRING
     PROJECTS
       VTK
     )

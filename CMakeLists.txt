@@ -26,6 +26,11 @@ find_package(Git REQUIRED)
 mark_as_superbuild(GIT_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
+# Options
+option(SlicerIMSTK_BUILD_ViewerVTK "Build iMSTK ViewerVTK" ON)
+mark_as_superbuild(SlicerIMSTK_BUILD_ViewerVTK)
+
+#-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
 mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)

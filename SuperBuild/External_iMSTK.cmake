@@ -47,6 +47,12 @@ else()
   list(APPEND ${proj}_DEPENDS
     ${_vtk_modules_depends}
     )
+  # Add dependency on "tbb" only if not already built-in Slicer
+  if(NOT Slicer_USE_TBB)
+    list(APPEND ${proj}_DEPENDS
+      tbb
+      )
+  endif()
 endif()
 
 # Include dependent projects if any
@@ -103,6 +109,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       # Options
       -DiMSTK_SUPERBUILD:BOOL=OFF
       -DiMSTK_BUILD_TESTING:BOOL=OFF
+      -DiMSTK_BUILD_VISUAL_TESTING:BOOL=OFF
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
