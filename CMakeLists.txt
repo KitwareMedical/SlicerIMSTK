@@ -41,22 +41,6 @@ endif()
 add_subdirectory(IMSTK)
 
 #-----------------------------------------------------------------------------
-# Install FTD2XX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
-    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-    COMPONENT RuntimeLibraries
-    )
-  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
-      RENAME "ftd2xx.dll"
-      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-      COMPONENT RuntimeLibraries
-      )
-  endif()
-endif()
-
-#-----------------------------------------------------------------------------
 # Install Libusb
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   install(FILES ${Libusb_LIBRARY_PATHS_LAUNCHER_BUILD}/${Libusb_DLL_NAME}

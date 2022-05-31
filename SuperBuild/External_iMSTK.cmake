@@ -5,7 +5,6 @@ set(${proj}_DEPENDS
   Assimp
   Eigen3
   g3log
-  LibNiFalcon
   Libusb
   OpenVR
   VegaFEM
