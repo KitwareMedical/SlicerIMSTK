@@ -30,8 +30,10 @@
 #include "imstkDirectionalLight.h"
 #include "imstkDummyClient.h"
 #include "imstkGeometryUtilities.h"
-#include "imstkHapticDeviceClient.h"
-#include "imstkHapticDeviceManager.h"
+#ifdef Slicer_iMSTK_USE_OpenHaptics
+# include "imstkHapticDeviceClient.h"
+# include "imstkHapticDeviceManager.h"
+#endif
 #include "imstkKeyboardSceneControl.h"
 #include "imstkMouseSceneControl.h"
 #include "imstkNew.h"
