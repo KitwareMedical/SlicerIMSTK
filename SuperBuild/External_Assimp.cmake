@@ -32,6 +32,7 @@ mark_as_superbuild(
     ${proj}_LIB_DIR:STRING
   PROJECTS
     iMSTK
+    ${SUPERBUILD_TOPLEVEL_PROJECT}
   )
 
 #-----------------------------------------------------------------------------

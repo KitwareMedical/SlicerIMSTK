@@ -56,16 +56,32 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Install OpenVR
-install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
-  DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-  COMPONENT RuntimeLibraries
-  )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR};iMSTK;RuntimeLibraries;/")
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../Assimp-build;Assimp;libassimp3.3.1;/")
+if(NOT APPLE)
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../Assimp-build;Assimp;libassimp3.3.1;/")
+  if(NOT Slicer_USE_TBB)
+    include(SlicerFunctionInstallLibrary) # Required by SlicerBlockInstallTBB
+    include(SlicerBlockInstallTBB)
+  endif()
+endif()
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
+
+if(APPLE)
+  set(EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES)
+  list(APPEND EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES ${Assimp_ROOT_DIR})
+  if(NOT Slicer_USE_TBB)
+    list(APPEND EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES ${TBB_LIB_DIR})
+  endif()
+  set(${EXTENSION_NAME}_FIXUP_BUNDLE_LIBRARY_DIRECTORIES "${EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES}" CACHE STRING "List of directories to look up libraries to copy into the application package" FORCE)
+endif()
 
 #-----------------------------------------------------------------------------
 list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
