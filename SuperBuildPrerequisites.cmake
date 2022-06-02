@@ -32,6 +32,21 @@ else()
   endif()
   # Add dependency on "tbb" only if not already built-in Slicer
   if(NOT Slicer_USE_TBB)
+    # Download "tbb" external project file
+    set(dest_file "${CMAKE_CURRENT_BINARY_DIR}/SuperBuild/External_tbb.cmake")
+    set(url "https://raw.githubusercontent.com/Slicer/Slicer/177f3b324247de4e77d4497cc9121fe37dd5b3f3/SuperBuild/External_tbb.cmake")
+    set(expected_hash "ab2a3627770a2bd60a091a2ffb96fd54a7d1184bf21076528b23e51e97a90ff1")
+    set(current_hash "")
+    if(EXISTS ${dest_file})
+      file(SHA256 ${dest_file} current_hash)
+    endif()
+    if(NOT "${current_hash}" STREQUAL "${expected_hash}")
+      set(_msg "SuperBuildPrequisites - Downloading External_tbb.cmake")
+      message(STATUS "${_msg}")
+      file(DOWNLOAD ${url} ${dest_file} EXPECTED_HASH SHA256=${expected_hash})
+      message(STATUS "${_msg} - ok")
+    endif()
+    # Ensure "tbb" external project file is found
     list(APPEND EXTERNAL_PROJECT_ADDITIONAL_DIRS
       ${CMAKE_CURRENT_BINARY_DIR}/SuperBuild
       )

@@ -13,11 +13,17 @@ set(iMSTK_LIBRARIES
   imstk::FilteringCore
   imstk::Geometry
   imstk::MeshIO
-  imstk::Rendering
+  imstk::RenderingCore
   imstk::Scene
   imstk::SceneEntities
   imstk::SimulationManager
   )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  list(APPEND iMSTK_LIBRARIES
+    imstk::RenderingVTK
+    imstk::ViewerVTK
+    )
+endif()
 
 set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
 

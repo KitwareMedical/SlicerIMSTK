@@ -17,7 +17,7 @@
 
 // IMSTK Logic includes
 #include "vtkSlicerIMSTKLogic.h"
-#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics
+#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics, SlicerIMSTK_BUILD_ViewerVTK
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
@@ -44,7 +44,9 @@
 #include "imstkSimulationManager.h"
 #include "imstkSurfaceMesh.h"
 #include "imstkVisualModel.h"
-#include "imstkVTKViewer.h"
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
+# include "imstkVTKViewer.h"
+#endif
 
 // VTK includes
 #include <vtkIntArray.h>
@@ -218,9 +220,11 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
   // Run the simulation
   {
     // Setup a viewer to render in its own thread
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     imstk::imstkNew<imstk::VTKViewer> viewer;
     viewer->setActiveScene(scene);
     viewer->getVtkRenderWindow()->SetShowWindow(false);
+#endif
 
     // Setup a scene manager to advance the scene in its own thread
     imstk::imstkNew<imstk::SceneManager> sceneManager;
