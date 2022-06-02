@@ -16,6 +16,11 @@ set(SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
   iMSTK
   )
 if(DEFINED Slicer_SOURCE_DIR)
+
+  if(NOT DEFINED SlicerIMSTK_BUILD_ViewerVTK)
+    set(SlicerIMSTK_BUILD_ViewerVTK ON)
+  endif()
+
   # Extension is bundled in a custom application
   if(SlicerIMSTK_BUILD_ViewerVTK)
     list(APPEND SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
