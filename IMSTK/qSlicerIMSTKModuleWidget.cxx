@@ -156,6 +156,7 @@ void qSlicerIMSTKModuleWidget::onHapticStopButton()
 void qSlicerIMSTKModuleWidget::onRigidBodyInputsChanged(vtkMRMLNode* unused)
 {
   Q_D(qSlicerIMSTKModuleWidget);
+  Q_UNUSED(unused);
 
   std::cout << "changed rigid body inputs" << std::endl;
   d->RigidBodyApplyButton->setEnabled(d->RigidBodyInputModelComboBox->currentNode() != nullptr &&
@@ -168,6 +169,7 @@ void qSlicerIMSTKModuleWidget::onRigidBodyInputsChanged(vtkMRMLNode* unused)
 void qSlicerIMSTKModuleWidget::onHapticInputsChanged(vtkMRMLNode* unused)
 {
   Q_D(qSlicerIMSTKModuleWidget);
+  Q_UNUSED(unused);
 
   std::cout << "changed haptic inputs" << std::endl;
 
