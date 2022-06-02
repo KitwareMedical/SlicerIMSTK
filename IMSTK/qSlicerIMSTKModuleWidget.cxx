@@ -38,8 +38,6 @@ class qSlicerIMSTKModuleWidgetPrivate: public Ui_qSlicerIMSTKModuleWidget
 public:
   qSlicerIMSTKModuleWidgetPrivate(qSlicerIMSTKModuleWidget& object);
   vtkSlicerIMSTKLogic* logic() const;
-  int hapticSimulationTag;
-  int rigidSimulationTag;
 
 private:
   qSlicerIMSTKModuleWidget* const q_ptr;
@@ -50,9 +48,7 @@ private:
 
 //-----------------------------------------------------------------------------
 qSlicerIMSTKModuleWidgetPrivate::qSlicerIMSTKModuleWidgetPrivate(qSlicerIMSTKModuleWidget& object)
-  : q_ptr(&object),
-  hapticSimulationTag(-1),
-  rigidSimulationTag(-1)
+  : q_ptr(&object)
 {
 }
 
