@@ -115,6 +115,7 @@ void vtkSlicerIMSTKLogic
 {
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::string deviceName, vtkMRMLLinearTransformNode* outputTransformNode)
 {
 #ifdef Slicer_iMSTK_USE_OpenHaptics
@@ -192,6 +193,7 @@ void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::strin
 #endif
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, vtkMRMLModelNode* inputNode, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode)
 {
 
@@ -252,9 +254,9 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
     this->simulations[simName] = driver;
     driver->start();
   }
-
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::observeRigidBody(std::shared_ptr<imstk::SceneManager> sceneManager, std::shared_ptr<imstk::SceneObject> object, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode)
 {
   vtkSmartPointer<vtkPolyData> polyDataOutput = imstk::GeometryUtils::copyToVtkPolyData(std::dynamic_pointer_cast<imstk::SurfaceMesh>(object->getVisualGeometry()));
@@ -278,6 +280,7 @@ void vtkSlicerIMSTKLogic::observeRigidBody(std::shared_ptr<imstk::SceneManager> 
     });
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::stopSimulation(std::string simName)
 {
   auto simulation = this->simulations[simName];
