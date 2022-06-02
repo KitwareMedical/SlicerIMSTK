@@ -241,10 +241,13 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
     this->observeRigidBody(sceneManager, object, outputNode, outputTransformNode);
 
     imstk::imstkNew<imstk::SimulationManager> driver;
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     driver->addModule(viewer);
+#endif
     driver->addModule(sceneManager);
 
     // Add mouse and keyboard controls to the viewer
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     {
       imstk::imstkNew<imstk::MouseSceneControl> mouseControl(viewer->getMouseDevice());
       mouseControl->setSceneManager(sceneManager);
@@ -255,6 +258,7 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
       keyControl->setModuleDriver(driver);
       viewer->addControl(keyControl);
     }
+#endif
     this->simulations[simName] = driver;
     driver->start();
   }

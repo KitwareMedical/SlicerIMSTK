@@ -6,9 +6,13 @@ set(${proj}_DEPENDS
   Eigen3
   g3log
   Libusb
-  OpenVR
   VegaFEM
   )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  list(APPEND ${proj}_DEPENDS
+    OpenVR
+    )
+endif()
 
 set(iMSTK_USE_OpenHaptics OFF)
 if(WIN32)
@@ -32,9 +36,13 @@ if(NOT SB_SECOND_PASS)
 endif()
 
 set(_vtk_modules_depends
-  vtkRenderingExternal
-  vtkRenderingOpenVR
   )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  list(APPEND _vtk_modules_depends
+    vtkRenderingExternal
+    vtkRenderingOpenVR
+    )
+endif()
 if(DEFINED Slicer_SOURCE_DIR)
   # Extension is bundled in a custom application
   list(APPEND ${proj}_DEPENDS
@@ -115,6 +123,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
       -DiMSTK_USE_OpenHaptics:BOOL=${iMSTK_USE_OpenHaptics}
+      -DiMSTK_USE_RENDERING_VTK:BOOL=${SlicerIMSTK_BUILD_ViewerVTK}
       # Dependencies
       -DTBB_DIR:PATH=${TBB_DIR}
       -DVTK_DIR:PATH=${VTK_DIR}
