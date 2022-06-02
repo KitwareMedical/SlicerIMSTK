@@ -27,8 +27,7 @@ mark_as_superbuild(GIT_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
 # Options
-option(SlicerIMSTK_BUILD_ViewerVTK "Build iMSTK ViewerVTK" ON)
-mark_as_superbuild(SlicerIMSTK_BUILD_ViewerVTK)
+include("${CMAKE_CURRENT_SOURCE_DIR}/SlicerIMSTKOptions.cmake")
 
 #-----------------------------------------------------------------------------
 # SuperBuild setup

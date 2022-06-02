@@ -9,6 +9,8 @@ if(DEFINED slicersources_SOURCE_DIR AND NOT DEFINED Slicer_SOURCE_DIR)
   set(Slicer_SOURCE_DIR ${slicersources_SOURCE_DIR})
 endif()
 
+include("${CMAKE_CURRENT_LIST_DIR}/SlicerIMSTKOptions.cmake")
+
 # Set list of dependencies to ensure the custom application bundling this
 # extension does NOT automatically collect the project list and attempt to
 # build external projects associated with VTK modules enabled below.
@@ -16,10 +18,6 @@ set(SlicerIMSTK_EXTERNAL_PROJECT_DEPENDENCIES
   iMSTK
   )
 if(DEFINED Slicer_SOURCE_DIR)
-
-  if(NOT DEFINED SlicerIMSTK_BUILD_ViewerVTK)
-    set(SlicerIMSTK_BUILD_ViewerVTK ON)
-  endif()
 
   # Extension is bundled in a custom application
   if(SlicerIMSTK_BUILD_ViewerVTK)
