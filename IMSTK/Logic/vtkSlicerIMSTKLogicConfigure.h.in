@@ -1,2 +1,4 @@
 
 #cmakedefine Slicer_iMSTK_USE_OpenHaptics
+
+#cmakedefine SlicerIMSTK_BUILD_ViewerVTK

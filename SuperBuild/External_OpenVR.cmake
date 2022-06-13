@@ -38,14 +38,6 @@ mark_as_superbuild(
     iMSTK
   )
 
-set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR YES)
-mark_as_superbuild(
-  VARS
-    VTK_MODULE_ENABLE_VTK_RenderingOpenVR:STRING
-  PROJECTS
-    VTK
-  )
-
 # Variable used in extension CMakeLists.txt to specify install rule
 mark_as_superbuild(${proj}_DLL_NAME:STRING)
 

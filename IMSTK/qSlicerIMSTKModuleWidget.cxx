@@ -38,8 +38,6 @@ class qSlicerIMSTKModuleWidgetPrivate: public Ui_qSlicerIMSTKModuleWidget
 public:
   qSlicerIMSTKModuleWidgetPrivate(qSlicerIMSTKModuleWidget& object);
   vtkSlicerIMSTKLogic* logic() const;
-  int hapticSimulationTag;
-  int rigidSimulationTag;
 
 private:
   qSlicerIMSTKModuleWidget* const q_ptr;
@@ -50,9 +48,7 @@ private:
 
 //-----------------------------------------------------------------------------
 qSlicerIMSTKModuleWidgetPrivate::qSlicerIMSTKModuleWidgetPrivate(qSlicerIMSTKModuleWidget& object)
-  : q_ptr(&object),
-  hapticSimulationTag(-1),
-  rigidSimulationTag(-1)
+  : q_ptr(&object)
 {
 }
 
@@ -100,6 +96,7 @@ void qSlicerIMSTKModuleWidget::setup()
   d->RigidStopButton->setEnabled(false);
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onRigidBodyApplyButton()
 {
   Q_D(qSlicerIMSTKModuleWidget);
@@ -119,6 +116,7 @@ void qSlicerIMSTKModuleWidget::onRigidBodyApplyButton()
   d->logic()->runObjectCtrlDummyClientExample("RigidBody", input, output, transform);
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onHapticApplyButton()
 {
   Q_D(qSlicerIMSTKModuleWidget);
@@ -133,10 +131,9 @@ void qSlicerIMSTKModuleWidget::onHapticApplyButton()
   disp->SetEditorVisibility(true);
 
   d->logic()->runHapticDeviceExample("HapticDevice",d->HapticDeviceNameLineEdit->text().toStdString(), transform);
-
-
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onRigidStopButton()
 {
   Q_D(qSlicerIMSTKModuleWidget);
@@ -146,6 +143,7 @@ void qSlicerIMSTKModuleWidget::onRigidStopButton()
   this->onRigidBodyInputsChanged(nullptr);
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onHapticStopButton()
 {
   Q_D(qSlicerIMSTKModuleWidget);
@@ -154,9 +152,11 @@ void qSlicerIMSTKModuleWidget::onHapticStopButton()
   this->onHapticInputsChanged(nullptr);
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onRigidBodyInputsChanged(vtkMRMLNode* unused)
 {
   Q_D(qSlicerIMSTKModuleWidget);
+  Q_UNUSED(unused);
 
   std::cout << "changed rigid body inputs" << std::endl;
   d->RigidBodyApplyButton->setEnabled(d->RigidBodyInputModelComboBox->currentNode() != nullptr &&
@@ -165,9 +165,11 @@ void qSlicerIMSTKModuleWidget::onRigidBodyInputsChanged(vtkMRMLNode* unused)
                                       d->RigidBodyInputModelComboBox->currentNodeID() != d->RigidBodyOutputModelComboBox->currentNodeID());
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerIMSTKModuleWidget::onHapticInputsChanged(vtkMRMLNode* unused)
 {
   Q_D(qSlicerIMSTKModuleWidget);
+  Q_UNUSED(unused);
 
   std::cout << "changed haptic inputs" << std::endl;
 

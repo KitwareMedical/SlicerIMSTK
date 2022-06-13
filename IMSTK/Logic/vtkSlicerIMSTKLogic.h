@@ -53,7 +53,9 @@ public:
 
   static vtkSlicerIMSTKLogic *New();
   vtkTypeMacro(vtkSlicerIMSTKLogic, vtkSlicerModuleLogic);
+
   void PrintSelf(ostream& os, vtkIndent indent) override;
+
   void runObjectCtrlDummyClientExample(std::string simName, vtkMRMLModelNode* inputNode, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode);
   void observeRigidBody(std::shared_ptr<imstk::SceneManager> sceneManager, std::shared_ptr<imstk::SceneObject> object, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode);
   void runHapticDeviceExample(std::string simName, std::string deviceName, vtkMRMLLinearTransformNode* outputTransformNode);
@@ -64,8 +66,10 @@ protected:
   ~vtkSlicerIMSTKLogic() override;
 
   void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
+
   /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
   void RegisterNodes() override;
+
   void UpdateFromMRMLScene() override;
   void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
   void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;

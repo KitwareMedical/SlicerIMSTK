@@ -5,11 +5,14 @@ set(${proj}_DEPENDS
   Assimp
   Eigen3
   g3log
-  LibNiFalcon
   Libusb
-  OpenVR
   VegaFEM
   )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  list(APPEND ${proj}_DEPENDS
+    OpenVR
+    )
+endif()
 
 set(iMSTK_USE_OpenHaptics OFF)
 if(WIN32)
@@ -33,9 +36,13 @@ if(NOT SB_SECOND_PASS)
 endif()
 
 set(_vtk_modules_depends
-  vtkRenderingExternal
-  vtkRenderingOpenVR
   )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  list(APPEND _vtk_modules_depends
+    vtkRenderingExternal
+    vtkRenderingOpenVR
+    )
+endif()
 if(DEFINED Slicer_SOURCE_DIR)
   # Extension is bundled in a custom application
   list(APPEND ${proj}_DEPENDS
@@ -48,6 +55,12 @@ else()
   list(APPEND ${proj}_DEPENDS
     ${_vtk_modules_depends}
     )
+  # Add dependency on "tbb" only if not already built-in Slicer
+  if(NOT Slicer_USE_TBB)
+    list(APPEND ${proj}_DEPENDS
+      tbb
+      )
+  endif()
 endif()
 
 # Include dependent projects if any
@@ -97,6 +110,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
       -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}
       -DCMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}
+      -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
       # Output directories
       -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${EP_BINARY_DIR}/bin
       -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${EP_BINARY_DIR}/lib
@@ -104,10 +118,12 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       # Options
       -DiMSTK_SUPERBUILD:BOOL=OFF
       -DiMSTK_BUILD_TESTING:BOOL=OFF
+      -DiMSTK_BUILD_VISUAL_TESTING:BOOL=OFF
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
       -DiMSTK_USE_OpenHaptics:BOOL=${iMSTK_USE_OpenHaptics}
+      -DiMSTK_USE_RENDERING_VTK:BOOL=${SlicerIMSTK_BUILD_ViewerVTK}
       # Dependencies
       -DTBB_DIR:PATH=${TBB_DIR}
       -DVTK_DIR:PATH=${VTK_DIR}

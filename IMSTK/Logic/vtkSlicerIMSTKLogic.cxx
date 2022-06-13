@@ -17,7 +17,7 @@
 
 // IMSTK Logic includes
 #include "vtkSlicerIMSTKLogic.h"
-#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics
+#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics, SlicerIMSTK_BUILD_ViewerVTK
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
@@ -30,8 +30,10 @@
 #include "imstkDirectionalLight.h"
 #include "imstkDummyClient.h"
 #include "imstkGeometryUtilities.h"
-#include "imstkHapticDeviceClient.h"
-#include "imstkHapticDeviceManager.h"
+#ifdef Slicer_iMSTK_USE_OpenHaptics
+# include "imstkHapticDeviceClient.h"
+# include "imstkHapticDeviceManager.h"
+#endif
 #include "imstkKeyboardSceneControl.h"
 #include "imstkMouseSceneControl.h"
 #include "imstkNew.h"
@@ -42,7 +44,9 @@
 #include "imstkSimulationManager.h"
 #include "imstkSurfaceMesh.h"
 #include "imstkVisualModel.h"
-#include "imstkVTKViewer.h"
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
+# include "imstkVTKViewer.h"
+#endif
 
 // VTK includes
 #include <vtkIntArray.h>
@@ -113,6 +117,7 @@ void vtkSlicerIMSTKLogic
 {
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::string deviceName, vtkMRMLLinearTransformNode* outputTransformNode)
 {
 #ifdef Slicer_iMSTK_USE_OpenHaptics
@@ -190,6 +195,7 @@ void vtkSlicerIMSTKLogic::runHapticDeviceExample(std::string simName, std::strin
 #endif
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, vtkMRMLModelNode* inputNode, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode)
 {
 
@@ -214,9 +220,11 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
   // Run the simulation
   {
     // Setup a viewer to render in its own thread
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     imstk::imstkNew<imstk::VTKViewer> viewer;
     viewer->setActiveScene(scene);
     viewer->getVtkRenderWindow()->SetShowWindow(false);
+#endif
 
     // Setup a scene manager to advance the scene in its own thread
     imstk::imstkNew<imstk::SceneManager> sceneManager;
@@ -233,10 +241,13 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
     this->observeRigidBody(sceneManager, object, outputNode, outputTransformNode);
 
     imstk::imstkNew<imstk::SimulationManager> driver;
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     driver->addModule(viewer);
+#endif
     driver->addModule(sceneManager);
 
     // Add mouse and keyboard controls to the viewer
+#ifdef SlicerIMSTK_BUILD_ViewerVTK
     {
       imstk::imstkNew<imstk::MouseSceneControl> mouseControl(viewer->getMouseDevice());
       mouseControl->setSceneManager(sceneManager);
@@ -247,12 +258,13 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
       keyControl->setModuleDriver(driver);
       viewer->addControl(keyControl);
     }
+#endif
     this->simulations[simName] = driver;
     driver->start();
   }
-
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::observeRigidBody(std::shared_ptr<imstk::SceneManager> sceneManager, std::shared_ptr<imstk::SceneObject> object, vtkMRMLModelNode* outputNode, vtkMRMLLinearTransformNode* outputTransformNode)
 {
   vtkSmartPointer<vtkPolyData> polyDataOutput = imstk::GeometryUtils::copyToVtkPolyData(std::dynamic_pointer_cast<imstk::SurfaceMesh>(object->getVisualGeometry()));
@@ -276,6 +288,7 @@ void vtkSlicerIMSTKLogic::observeRigidBody(std::shared_ptr<imstk::SceneManager> 
     });
 }
 
+//-----------------------------------------------------------------------------
 void vtkSlicerIMSTKLogic::stopSimulation(std::string simName)
 {
   auto simulation = this->simulations[simName];

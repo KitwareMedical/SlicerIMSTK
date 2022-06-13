@@ -27,5 +27,5 @@ mark_as_superbuild(
     ${proj}_LIB_DIR:STRING
   PROJECTS
     iMSTK
-    Slicer
+    ${SUPERBUILD_TOPLEVEL_PROJECT}
   )

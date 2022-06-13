@@ -26,6 +26,10 @@ find_package(Git REQUIRED)
 mark_as_superbuild(GIT_EXECUTABLE)
 
 #-----------------------------------------------------------------------------
+# Options
+include("${CMAKE_CURRENT_SOURCE_DIR}/SlicerIMSTKOptions.cmake")
+
+#-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
 mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
@@ -41,22 +45,6 @@ endif()
 add_subdirectory(IMSTK)
 
 #-----------------------------------------------------------------------------
-# Install FTD2XX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
-    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-    COMPONENT RuntimeLibraries
-    )
-  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    install(FILES ${FTD2XX_LIBRARY_PATHS_LAUNCHER_BUILD}/${FTD2XX_DLL_NAME}
-      RENAME "ftd2xx.dll"
-      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-      COMPONENT RuntimeLibraries
-      )
-  endif()
-endif()
-
-#-----------------------------------------------------------------------------
 # Install Libusb
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   install(FILES ${Libusb_LIBRARY_PATHS_LAUNCHER_BUILD}/${Libusb_DLL_NAME}
@@ -67,16 +55,32 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Install OpenVR
-install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
-  DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-  COMPONENT RuntimeLibraries
-  )
+if(SlicerIMSTK_BUILD_ViewerVTK)
+  install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/${OpenVR_DLL_NAME}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR};iMSTK;RuntimeLibraries;/")
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../Assimp-build;Assimp;libassimp3.3.1;/")
+if(NOT APPLE)
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${iMSTK_DIR}/../Assimp-build;Assimp;libassimp3.3.1;/")
+  if(NOT Slicer_USE_TBB)
+    include(SlicerFunctionInstallLibrary) # Required by SlicerBlockInstallTBB
+    include(SlicerBlockInstallTBB)
+  endif()
+endif()
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
+
+if(APPLE)
+  set(EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES)
+  list(APPEND EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES ${Assimp_ROOT_DIR})
+  if(NOT Slicer_USE_TBB)
+    list(APPEND EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES ${TBB_LIB_DIR})
+  endif()
+  set(${EXTENSION_NAME}_FIXUP_BUNDLE_LIBRARY_DIRECTORIES "${EXTENSION_FIXUP_BUNDLE_LIBRARY_DIRECTORIES}" CACHE STRING "List of directories to look up libraries to copy into the application package" FORCE)
+endif()
 
 #-----------------------------------------------------------------------------
 list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
