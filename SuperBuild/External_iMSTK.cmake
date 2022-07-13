@@ -15,11 +15,11 @@ if(SlicerIMSTK_BUILD_ViewerVTK)
 endif()
 
 set(iMSTK_USE_OpenHaptics OFF)
-if(WIN32)
+if(WIN32 AND SlicerIMSTK_USE_OpenHaptics)
   list(APPEND ${proj}_DEPENDS
     OpenHaptics
     )
-  set(iMSTK_USE_OpenHaptics ON)
+  set(iMSTK_USE_OpenHaptics SlicerIMSTK_USE_OpenHaptics)
 endif()
 
 if(NOT SB_SECOND_PASS)
