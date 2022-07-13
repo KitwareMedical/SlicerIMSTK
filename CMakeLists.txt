@@ -39,6 +39,11 @@ if(${EXTENSION_NAME}_SUPERBUILD)
   return()
 endif()
 
+if(NOT SlicerIMSTK_USE_OpenHaptics)
+    set(SlicerIMSTK_USE_OpenHaptics OFF)
+endif()
+mark_as_superbuild(SlicerIMSTK_USE_OpenHaptics) 
+
 #-----------------------------------------------------------------------------
 # Extension modules
 
