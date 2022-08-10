@@ -40,7 +40,12 @@ set(${KIT}_TARGET_LIBRARIES
   ${iMSTK_LIBRARIES}
   )
 
+# The following variables are set in "iMSTKConfig" included after
+# calling "find_package(iMSTK ..)":
+# * iMSTK_USE_OpenHaptics
+# * iMSTK_USE_RENDERING_VTK
 set(Slicer_iMSTK_USE_OpenHaptics ${iMSTK_USE_OpenHaptics})
+set(Slicer_iMSTK_USE_RENDERING_VTK ${iMSTK_USE_RENDERING_VTK})
 set(configure_header_file vtkSlicerIMSTKLogicConfigure.h)
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/${configure_header_file}.in

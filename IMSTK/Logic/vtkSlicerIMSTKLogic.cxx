@@ -17,7 +17,7 @@
 
 // IMSTK Logic includes
 #include "vtkSlicerIMSTKLogic.h"
-#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics, SlicerIMSTK_BUILD_ViewerVTK
+#include "vtkSlicerIMSTKLogicConfigure.h" // For Slicer_iMSTK_USE_OpenHaptics, Slicer_iMSTK_USE_RENDERING_VTK
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
@@ -44,7 +44,7 @@
 #include "imstkSimulationManager.h"
 #include "imstkSurfaceMesh.h"
 #include "imstkVisualModel.h"
-#ifdef SlicerIMSTK_BUILD_ViewerVTK
+#ifdef Slicer_iMSTK_USE_RENDERING_VTK
 # include "imstkVTKViewer.h"
 #endif
 
@@ -220,7 +220,7 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
   // Run the simulation
   {
     // Setup a viewer to render in its own thread
-#ifdef SlicerIMSTK_BUILD_ViewerVTK
+#ifdef Slicer_iMSTK_USE_RENDERING_VTK
     imstk::imstkNew<imstk::VTKViewer> viewer;
     viewer->setActiveScene(scene);
     viewer->getVtkRenderWindow()->SetShowWindow(false);
@@ -241,13 +241,13 @@ void vtkSlicerIMSTKLogic::runObjectCtrlDummyClientExample(std::string simName, v
     this->observeRigidBody(sceneManager, object, outputNode, outputTransformNode);
 
     imstk::imstkNew<imstk::SimulationManager> driver;
-#ifdef SlicerIMSTK_BUILD_ViewerVTK
+#ifdef Slicer_iMSTK_USE_RENDERING_VTK
     driver->addModule(viewer);
 #endif
     driver->addModule(sceneManager);
 
     // Add mouse and keyboard controls to the viewer
-#ifdef SlicerIMSTK_BUILD_ViewerVTK
+#ifdef Slicer_iMSTK_USE_RENDERING_VTK
     {
       imstk::imstkNew<imstk::MouseSceneControl> mouseControl(viewer->getMouseDevice());
       mouseControl->setSceneManager(sceneManager);
