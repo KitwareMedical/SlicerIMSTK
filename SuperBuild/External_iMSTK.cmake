@@ -14,12 +14,10 @@ if(SlicerIMSTK_BUILD_ViewerVTK)
     )
 endif()
 
-set(iMSTK_USE_OpenHaptics OFF)
-if(WIN32 AND SlicerIMSTK_USE_OpenHaptics)
+if(SlicerIMSTK_BUILD_HapticsDeviceClient)
   list(APPEND ${proj}_DEPENDS
     OpenHaptics
     )
-  set(iMSTK_USE_OpenHaptics SlicerIMSTK_USE_OpenHaptics)
 endif()
 
 if(NOT SB_SECOND_PASS)
@@ -122,7 +120,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DiMSTK_BUILD_EXAMPLES:BOOL=OFF
       -DiMSTK_USE_MODEL_REDUCTION:BOOL=OFF
       -DiMSTK_ENABLE_AUDIO:BOOL=OFF
-      -DiMSTK_USE_OpenHaptics:BOOL=${iMSTK_USE_OpenHaptics}
+      -DiMSTK_USE_OpenHaptics:BOOL=${SlicerIMSTK_BUILD_HapticsDeviceClient}
       -DiMSTK_USE_RENDERING_VTK:BOOL=${SlicerIMSTK_BUILD_ViewerVTK}
       # Dependencies
       -DTBB_DIR:PATH=${TBB_DIR}
