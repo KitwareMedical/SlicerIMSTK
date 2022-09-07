@@ -7,7 +7,7 @@ if(NOT DEFINED iMSTK_SOURCE_DIR)
   FetchContent_Populate(${proj}
     SOURCE_DIR     ${EP_SOURCE_DIR}
     GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/KitwareMedical/iMSTK.git
-    GIT_TAG        c1e1f758c03b051edf27fa9223e5df5a7404d938  # slicerimstk-v5.0.0-2022-05-26-beb83349
+    GIT_TAG        27beeb520240ecc1bd9e21bdfe9f2bee2a206c9a  # slicerimstk-v6.0.0-2022-08-18-531dfe
     QUIET
     )
   message(STATUS "Remote - ${proj} [OK]")
